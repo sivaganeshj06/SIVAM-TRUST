@@ -6,7 +6,7 @@ const multer = require('multer')
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
     if (allowed.includes(file.mimetype)) {
@@ -17,47 +17,65 @@ const upload = multer({
   }
 })
 
-// Upload photo for event (admin only)
-router.post('/upload', protect, upload.single('photo'), async (req, res) => {
+// Upload multiple photos
+router.post('/upload', protect, upload.array('photos', 10), async (req, res) => {
   try {
-    const { event_id, caption } = req.body
-    const file = req.file
+    const { event_id, title, caption } = req.body
+    const files = req.files
 
-    if (!file) return res.status(400).json({ error: 'No file uploaded' })
+    if (!files || files.length === 0)
+      return res.status(400).json({ error: 'No files uploaded' })
 
-    const fileName = `${Date.now()}_${file.originalname}`
+    if (!event_id)
+      return res.status(400).json({ error: 'event_id is required' })
 
-    const { data, error } = await supabase.storage
-      .from('event-photos')
-      .upload(fileName, file.buffer, {
-        contentType: file.mimetype,
-        upsert: false
-      })
+    const uploadedPhotos = []
 
-    if (error) return res.status(500).json({ error: error.message })
+    for (const file of files) {
+      const fileName = `${event_id}_${Date.now()}_${file.originalname.replace(/\s+/g, '_')}`
 
-    const { data: urlData } = supabase.storage
-      .from('event-photos')
-      .getPublicUrl(fileName)
+      const { error: storageError } = await supabase.storage
+        .from('event-photos')
+        .upload(fileName, file.buffer, {
+          contentType: file.mimetype,
+          upsert: false
+        })
 
-    const { data: photoData, error: dbError } = await supabase
-      .from('event_photos')
-      .insert([{
-        event_id,
-        photo_url: urlData.publicUrl,
-        caption
-      }])
-      .select()
+      if (storageError) {
+        console.error('Storage error:', storageError)
+        return res.status(500).json({ error: `Storage upload failed: ${storageError.message}` })
+      }
 
-    if (dbError) return res.status(500).json({ error: dbError.message })
+      const { data: urlData } = supabase.storage
+        .from('event-photos')
+        .getPublicUrl(fileName)
 
-    res.json({ success: true, photo: photoData[0] })
+      const { data: photoData, error: dbError } = await supabase
+        .from('event_photos')
+        .insert([{
+          event_id,
+          photo_url: urlData.publicUrl,
+          title: title || null,
+          caption: caption || null
+        }])
+        .select()
+
+      if (dbError) {
+        console.error('DB error:', dbError)
+        return res.status(500).json({ error: `Database error: ${dbError.message}` })
+      }
+
+      uploadedPhotos.push(photoData[0])
+    }
+
+    res.json({ success: true, photos: uploadedPhotos })
   } catch (err) {
+    console.error('Upload error:', err)
     res.status(500).json({ error: err.message })
   }
 })
 
-// Get photos for event
+// Get all photos for an event
 router.get('/:event_id', async (req, res) => {
   const { event_id } = req.params
   const { data, error } = await supabase
@@ -70,7 +88,7 @@ router.get('/:event_id', async (req, res) => {
   res.json(data)
 })
 
-// Delete photo (admin only)
+// Delete a photo
 router.delete('/:id', protect, async (req, res) => {
   const { id } = req.params
 

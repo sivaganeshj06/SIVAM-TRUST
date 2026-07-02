@@ -1,0 +1,39 @@
+.ct { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+.ct-hero { position: relative; padding: 8rem 2rem 5rem; overflow: hidden; background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #1e3a5f 100%); text-align: center; }
+.ct-hero-bg { position: absolute; inset: 0; pointer-events: none; }
+.ct-orb-1 { position: absolute; width: 500px; height: 500px; border-radius: 50%; background: rgba(37,99,235,0.2); filter: blur(80px); top: -150px; right: -100px; }
+.ct-orb-2 { position: absolute; width: 400px; height: 400px; border-radius: 50%; background: rgba(16,185,129,0.15); filter: blur(80px); bottom: -100px; left: -100px; }
+.ct-hero-inner { position: relative; z-index: 2; max-width: 700px; margin: 0 auto; }
+.ct-label { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #60a5fa; margin-bottom: 1rem; }
+.ct-hero-h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 900; color: white; line-height: 1.15; margin: 0 0 1rem; }
+.ct-grad { background: linear-gradient(135deg, #60a5fa, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.ct-hero-sub { font-size: 16px; color: rgba(255,255,255,0.6); margin: 0; }
+.ct-main { padding: 5rem 0; background: #f8fafc; }
+.ct-container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+.ct-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
+.ct-h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800; color: #0f172a; line-height: 1.2; margin: 0 0 1.5rem; }
+.ct-cards { display: flex; flex-direction: column; gap: 12px; }
+.ct-info-card { display: flex; align-items: flex-start; gap: 14px; background: white; padding: 1.25rem; border-radius: 16px; border: 1px solid #f1f5f9; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: all 0.2s; }
+.ct-info-icon { font-size: 24px; flex-shrink: 0; width: 44px; height: 44px; background: #eff6ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+.ct-info-card h4 { font-size: 13px; font-weight: 700; color: #0f172a; margin: 0 0 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+.ct-info-card p { font-size: 14px; color: #475569; margin: 0; }
+.ct-info-card a { font-size: 14px; color: #2563eb; text-decoration: none; font-weight: 500; display: block; }
+.ct-info-card a:hover { text-decoration: underline; }
+.ct-form-card { background: white; border-radius: 24px; padding: 2.5rem; box-shadow: 0 8px 40px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; }
+.ct-form-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 0 0 6px; }
+.ct-form-sub { font-size: 14px; color: #64748b; margin: 0 0 1.5rem; }
+.ct-error { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 12px 16px; border-radius: 12px; font-size: 13px; margin-bottom: 1rem; }
+.ct-form { display: flex; flex-direction: column; gap: 1rem; }
+.ct-field { display: flex; flex-direction: column; gap: 6px; }
+.ct-field label { font-size: 13px; font-weight: 600; color: #374151; }
+.ct-field input, .ct-field textarea { padding: 12px 16px; border: 1.5px solid #e2e8f0; border-radius: 12px; font-family: 'Inter', sans-serif; font-size: 15px; color: #0f172a; outline: none; transition: all 0.2s; background: #f8fafc; resize: vertical; }
+.ct-field input:focus, .ct-field textarea:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); background: white; }
+.ct-btn-blue { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 24px; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; border: none; border-radius: 12px; font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 8px 24px rgba(37,99,235,0.3); transition: all 0.2s; }
+.ct-submit { width: 100%; }
+.ct-spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.ct-success { text-align: center; padding: 2rem 0; }
+.ct-success-icon { font-size: 64px; margin-bottom: 1rem; }
+.ct-success h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.8rem; font-weight: 800; color: #0f172a; margin: 0 0 0.75rem; }
+.ct-success p { font-size: 15px; color: #475569; margin: 0 0 1.5rem; line-height: 1.6; }
+@media (max-width: 768px) { .ct-grid { grid-template-columns: 1fr; } .ct-container { padding: 0 1rem; } .ct-main { padding: 3rem 0; } }

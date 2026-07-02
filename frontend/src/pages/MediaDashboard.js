@@ -31,6 +31,7 @@ export default function MediaDashboard() {
   useEffect(() => {
     if (!token || trustUser?.role !== 'media') { navigate('/access-denied'); return; }
     fetchAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchAll = async () => {

@@ -8,7 +8,7 @@ import {
 } from 'recharts';
 import {
   Users, Heart, Calendar, MessageSquare, TrendingUp,
-  Bell, LogOut, Home, ChevronRight, Activity, Shield,
+  Bell, LogOut, Home, ChevronRight, Shield,
   DollarSign, CheckCircle, Clock, Menu, X, Sun, Moon
 } from 'lucide-react';
 import './FounderDashboard.css';
@@ -44,7 +44,6 @@ export default function FounderDashboard() {
   const [members, setMembers] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [pageLoaded, setPageLoaded] = useState(false);
 
   const trustUser = JSON.parse(localStorage.getItem('trust_user') || 'null');
   const token = localStorage.getItem('token');
@@ -53,6 +52,7 @@ export default function FounderDashboard() {
   useEffect(() => {
     if (!token || trustUser?.role !== 'founder') { navigate('/access-denied'); return; }
     fetchAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchAll = async () => {
@@ -72,7 +72,6 @@ export default function FounderDashboard() {
       else if (err.response?.status === 403) navigate('/access-denied');
     }
     setLoading(false);
-    setTimeout(() => setPageLoaded(true), 100);
   };
 
   const handleLogout = () => {

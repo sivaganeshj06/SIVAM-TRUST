@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from 'recharts';
-import { Calendar, Heart, Users, TrendingUp, Bell, LogOut, Home, ChevronRight, CheckCircle, Clock, Activity, Menu, X, Sun, Moon, FileText } from 'lucide-react';
+import { Calendar, Heart, TrendingUp, Bell, LogOut, Home, ChevronRight, CheckCircle, Clock, Activity, Menu, X, Sun, Moon, FileText } from 'lucide-react';
 import './CoFounderDashboard.css';
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -38,6 +38,7 @@ export default function CoFounderDashboard() {
   useEffect(() => {
     if (!token || !['co-founder-1', 'co-founder-2'].includes(trustUser?.role)) { navigate('/access-denied'); return; }
     fetchAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchAll = async () => {

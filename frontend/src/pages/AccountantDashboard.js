@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Legend } from 'recharts';
-import { DollarSign, TrendingUp, Bell, LogOut, Home, ChevronRight, CheckCircle, Clock, Menu, X, Sun, Moon, FileText, Download, Filter, CreditCard, AlertCircle } from 'lucide-react';
+import { DollarSign, TrendingUp, Bell, LogOut, Home, ChevronRight, CheckCircle, Clock, Menu, X, Sun, Moon, FileText, Download, Filter, CreditCard } from 'lucide-react';
 import './AccountantDashboard.css';
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -37,6 +37,7 @@ export default function AccountantDashboard() {
   useEffect(() => {
     if (!token || trustUser?.role !== 'accountant') { navigate('/access-denied'); return; }
     fetchAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchAll = async () => {

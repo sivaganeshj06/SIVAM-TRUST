@@ -6,27 +6,77 @@ const rateLimit = require('express-rate-limit')
 const hpp = require('hpp')
 require('dotenv').config()
 
+const auditLogger = require('./utils/logger')
+const { sanitizeMiddleware, errorResponder } = require('./middleware/securityMiddleware')
+
 const app = express()
 
-// ===== SECURITY HEADERS =====
-app.use(helmet())
+// ===== SECURITY HEADERS (HELMET) =====
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https://*.supabase.co"],
+      connectSrc: ["'self'", "https://*.supabase.co"]
+    }
+  },
+  hsts: {
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true
+  },
+  frameguard: { action: 'sameorigin' },
+  noSniff: true,
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
+}))
 
-// ===== CORS =====
+// ===== CUSTOM COOKIE PARSER MIDDLEWARE =====
+app.use((req, res, next) => {
+  req.cookies = {};
+  const cookieHeader = req.headers.cookie;
+  if (cookieHeader) {
+    cookieHeader.split(';').forEach(cookie => {
+      const parts = cookie.split('=');
+      req.cookies[parts[0].trim()] = parts.slice(1).join('=').trim();
+    });
+  }
+  next();
+});
+
+// ===== CORS SECURE CONFIGURATION =====
+const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000').split(',').map(o => o.trim());
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+      callback(null, true);
+    } else {
+      auditLogger.warn('CORS_BLOCKED', { origin, ip: req.ip });
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }))
 
 // ===== LOGGING =====
 app.use(morgan('dev'))
 
-// ===== BODY PARSING =====
-app.use(express.json({ limit: '10kb' })) // Limit body size
+// ===== BODY PARSING WITH SIZES LIMIT =====
+app.use(express.json({ limit: '10kb' })) // Limit body size to 10KB
 app.use(express.urlencoded({ extended: true, limit: '10kb' }))
 
 // ===== HTTP PARAMETER POLLUTION PROTECTION =====
 app.use(hpp())
+
+// ===== INPUT SANITIZATION =====
+app.use(sanitizeMiddleware)
 
 // ===== RATE LIMITING =====
 const limiter = rateLimit({
@@ -69,14 +119,10 @@ app.use((req, res) => {
 })
 
 // ===== GLOBAL ERROR HANDLER =====
-app.use((err, req, res, next) => {
-  console.error('Error:', err.message)
-  res.status(err.status || 500).json({
-    error: err.message || 'Internal server error'
-  })
-})
+app.use(errorResponder)
 
 const PORT = process.env.PORT || 5000
 app.listen(PORT, () => {
+  auditLogger.info('SERVER_STARTED', { port: PORT, env: process.env.NODE_ENV });
   console.log(`Server running on port ${PORT} 🚀`)
 })

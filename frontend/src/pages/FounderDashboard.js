@@ -51,7 +51,7 @@ export default function FounderDashboard() {
   const headers = { Authorization: `Bearer ${token}` };
 
   useEffect(() => {
-    if (!token || trustUser?.role !== 'founder') { navigate('/admin/login'); return; }
+    if (!token || trustUser?.role !== 'founder') { navigate('/access-denied'); return; }
     fetchAll();
   }, []);
 
@@ -67,7 +67,10 @@ export default function FounderDashboard() {
       setEvents(evt.data || []);
       setMembers(mem.data || []);
       setContacts(con.data || []);
-    } catch (err) { if (err.response?.status === 401) navigate('/admin/login'); }
+    } catch (err) { 
+      if (err.response?.status === 401) navigate('/admin/login'); 
+      else if (err.response?.status === 403) navigate('/access-denied');
+    }
     setLoading(false);
     setTimeout(() => setPageLoaded(true), 100);
   };

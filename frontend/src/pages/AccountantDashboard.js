@@ -35,13 +35,16 @@ export default function AccountantDashboard() {
   const headers = { Authorization: `Bearer ${token}` };
 
   useEffect(() => {
-    if (!token || !['accountant', 'founder'].includes(trustUser?.role)) { navigate('/admin/login'); return; }
+    if (!token || trustUser?.role !== 'accountant') { navigate('/access-denied'); return; }
     fetchAll();
   }, []);
 
   const fetchAll = async () => {
     try { const res = await axios.get(`${API}/api/donations`, { headers }); setDonations(res.data || []); }
-    catch (err) { if (err.response?.status === 401) navigate('/admin/login'); }
+    catch (err) { 
+      if (err.response?.status === 401) navigate('/admin/login'); 
+      else if (err.response?.status === 403) navigate('/access-denied');
+    }
     setLoading(false);
   };
 

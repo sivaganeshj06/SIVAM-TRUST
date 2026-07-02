@@ -36,7 +36,7 @@ export default function CoFounderDashboard() {
   const headers = { Authorization: `Bearer ${token}` };
 
   useEffect(() => {
-    if (!token || !['co-founder', 'founder'].includes(trustUser?.role)) { navigate('/admin/login'); return; }
+    if (!token || !['co-founder-1', 'co-founder-2'].includes(trustUser?.role)) { navigate('/access-denied'); return; }
     fetchAll();
   }, []);
 
@@ -44,7 +44,10 @@ export default function CoFounderDashboard() {
     try {
       const [don, evt] = await Promise.all([axios.get(`${API}/api/donations`, { headers }), axios.get(`${API}/api/events`, { headers })]);
       setDonations(don.data || []); setEvents(evt.data || []);
-    } catch (err) { if (err.response?.status === 401) navigate('/admin/login'); }
+    } catch (err) { 
+      if (err.response?.status === 401) navigate('/admin/login'); 
+      else if (err.response?.status === 403) navigate('/access-denied');
+    }
     setLoading(false);
   };
 

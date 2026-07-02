@@ -3,7 +3,8 @@ const router = express.Router()
 const supabase = require('../config/supabase')
 const { protect, requireRole } = require('../middleware/authMiddleware')
 const { sendDonationNotification } = require('../utils/mailer')
-const { body, validationResult } = require('express-validator')
+const { body, param, validationResult } = require('express-validator')
+const auditLogger = require('../utils/logger')
 
 // Validation rules
 const donationValidation = [
@@ -11,14 +12,14 @@ const donationValidation = [
     .trim()
     .notEmpty().withMessage('Donor name is required')
     .isLength({ min: 2, max: 100 }).withMessage('Name must be 2-100 characters')
-    .matches(/^[a-zA-Z\s]+$/).withMessage('Name must contain only letters'),
+    .matches(/^[a-zA-Z\s.]+$/).withMessage('Name must contain only letters, dots, and spaces'),
   body('email')
     .trim()
     .notEmpty().withMessage('Email is required')
     .isEmail().withMessage('Invalid email address')
     .normalizeEmail(),
   body('phone')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
     .matches(/^[0-9]{10}$/).withMessage('Phone must be 10 digits'),
   body('amount')
@@ -27,18 +28,31 @@ const donationValidation = [
     .custom(val => {
       if (Number(val) < 1) throw new Error('Amount must be at least ₹1')
       if (Number(val) > 1000000) throw new Error('Amount cannot exceed ₹10,00,000')
-      return true
+      return true;
     }),
+]
+
+const donationUpdateValidation = [
+  body('payment_status')
+    .trim()
+    .notEmpty().withMessage('Payment status is required')
+    .isIn(['pending', 'completed', 'failed']).withMessage('Invalid payment status'),
+  body('transaction_id')
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ min: 5, max: 100 }).withMessage('Transaction ID must be 5-100 characters')
+    .matches(/^[a-zA-Z0-9_-]+$/).withMessage('Transaction ID must contain only alphanumeric characters, dashes, or underscores'),
+]
+
+const validateDonationId = [
+  param('id').isUUID().withMessage('Invalid donation ID format')
 ]
 
 // Submit donation (public)
 router.post('/', donationValidation, async (req, res) => {
-  // Check validation errors
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
-    return res.status(400).json({
-      error: errors.array()[0].msg
-    })
+    return res.status(400).json({ error: errors.array()[0].msg })
   }
 
   const { donor_name, email, phone, amount } = req.body
@@ -65,9 +79,11 @@ router.post('/', donationValidation, async (req, res) => {
     .select()
 
   if (error) {
-    console.log('Supabase error:', error)
+    auditLogger.error('DONATION_SUBMISSION_FAILED', { error: error.message, donor_name, email });
     return res.status(500).json({ error: error.message })
   }
+
+  auditLogger.info('DONATION_SUBMITTED', { donationId: data[0].id, amount });
 
   // Send email notification
   await sendDonationNotification({ donor_name, email, phone, amount, payment_status: 'pending' })
@@ -91,7 +107,12 @@ router.get('/', protect, requireRole('founder', 'co-founder', 'accountant'), asy
 })
 
 // Update donation status (Founder + Accountant)
-router.put('/:id', protect, requireRole('founder', 'accountant'), async (req, res) => {
+router.put('/:id', protect, requireRole('founder', 'accountant'), validateDonationId, donationUpdateValidation, async (req, res) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: errors.array()[0].msg })
+  }
+
   const { payment_status, transaction_id } = req.body
   const { data, error } = await supabase
     .from('donations')
@@ -100,17 +121,26 @@ router.put('/:id', protect, requireRole('founder', 'accountant'), async (req, re
     .select()
 
   if (error) return res.status(500).json({ error: error.message })
+  
+  auditLogger.info('DONATION_UPDATED', { updaterId: req.user.id, donationId: req.params.id, status: payment_status });
   res.json({ success: true, data: data[0] })
 })
 
 // Delete donation (Founder only)
-router.delete('/:id', protect, requireRole('founder'), async (req, res) => {
+router.delete('/:id', protect, requireRole('founder'), validateDonationId, async (req, res) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: errors.array()[0].msg })
+  }
+
   const { error } = await supabase
     .from('donations')
     .delete()
     .eq('id', req.params.id)
 
   if (error) return res.status(500).json({ error: error.message })
+  
+  auditLogger.info('DONATION_DELETED', { deleterId: req.user.id, donationId: req.params.id });
   res.json({ success: true, message: 'Donation deleted' })
 })
 

@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const supabase = require('../config/supabase')
-const { protect } = require('../middleware/authMiddleware')
+const { protect, requireRole } = require('../middleware/authMiddleware')
 const multer = require('multer')
 
 const upload = multer({
@@ -17,8 +17,19 @@ const upload = multer({
   }
 })
 
+const crypto = require('crypto')
+
+const isValidImageBuffer = (buffer) => {
+  if (buffer.length < 4) return false;
+  const hex = buffer.toString('hex', 0, 4).toUpperCase();
+  const isJpeg = hex.startsWith('FFD8FF');
+  const isPng = hex === '89504E47';
+  const isWebp = hex === '52494646' && buffer.toString('hex', 8, 12).toUpperCase() === '57454250';
+  return isJpeg || isPng || isWebp;
+};
+
 // Upload multiple photos
-router.post('/upload', protect, upload.array('photos', 10), async (req, res) => {
+router.post('/upload', protect, requireRole('founder', 'co-founder', 'media'), upload.array('photos', 10), async (req, res) => {
   try {
     const { event_id, title, caption } = req.body
     const files = req.files
@@ -29,10 +40,23 @@ router.post('/upload', protect, upload.array('photos', 10), async (req, res) => 
     if (!event_id)
       return res.status(400).json({ error: 'event_id is required' })
 
+    // Validate magic bytes for all files before starting upload
+    for (const file of files) {
+      if (!isValidImageBuffer(file.buffer)) {
+        return res.status(400).json({ error: `File ${file.originalname} has invalid image content (failed magic bytes check)` });
+      }
+    }
+
     const uploadedPhotos = []
 
     for (const file of files) {
-      const fileName = `${event_id}_${Date.now()}_${file.originalname.replace(/\s+/g, '_')}`
+      const extension = file.originalname.split('.').pop().toLowerCase();
+      if (!['jpg', 'jpeg', 'png', 'webp'].includes(extension)) {
+        return res.status(400).json({ error: 'Invalid file extension. Only JPG, JPEG, PNG, WEBP allowed.' });
+      }
+      
+      // Secure random filename
+      const fileName = `${event_id}_${crypto.randomUUID()}.${extension}`;
 
       const { error: storageError } = await supabase.storage
         .from('event-photos')
@@ -89,7 +113,7 @@ router.get('/:event_id', async (req, res) => {
 })
 
 // Delete a photo
-router.delete('/:id', protect, async (req, res) => {
+router.delete('/:id', protect, requireRole('founder', 'co-founder', 'media'), async (req, res) => {
   const { id } = req.params
 
   const { data: photo } = await supabase

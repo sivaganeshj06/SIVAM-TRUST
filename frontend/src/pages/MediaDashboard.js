@@ -29,7 +29,7 @@ export default function MediaDashboard() {
   const headers = { Authorization: `Bearer ${token}` };
 
   useEffect(() => {
-    if (!token || !['media', 'founder'].includes(trustUser?.role)) { navigate('/admin/login'); return; }
+    if (!token || trustUser?.role !== 'media') { navigate('/access-denied'); return; }
     fetchAll();
   }, []);
 
@@ -42,7 +42,10 @@ export default function MediaDashboard() {
         try { const photoRes = await axios.get(`${API}/api/photos/${evt.id}`); photosArr.push(...(photoRes.data || []).map(p => ({ ...p, event_title: evt.title }))); } catch {}
       }
       setAllPhotos(photosArr);
-    } catch (err) { if (err.response?.status === 401) navigate('/admin/login'); }
+    } catch (err) { 
+      if (err.response?.status === 401) navigate('/admin/login'); 
+      else if (err.response?.status === 403) navigate('/access-denied');
+    }
     setLoading(false);
   };
 

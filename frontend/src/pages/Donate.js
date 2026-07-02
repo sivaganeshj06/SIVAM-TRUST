@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import './Donate.css';
 
-const API = process.env.REACT_APP_API_URL || 'https://sivam-trust.vercel.app';
+const API = process.env.REACT_APP_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : 'https://sivam-trust.vercel.app');
 
 const presetAmounts = [100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000];
 

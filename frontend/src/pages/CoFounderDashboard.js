@@ -6,7 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Calendar, Heart, TrendingUp, Bell, LogOut, Home, ChevronRight, CheckCircle, Clock, Activity, Menu, X, Sun, Moon, FileText } from 'lucide-react';
 import './CoFounderDashboard.css';
 
-const API = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API = process.env.REACT_APP_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : 'https://sivam-trust.vercel.app');
 
 function Counter({ target, prefix = '' }) {
   const [count, setCount] = useState(0);

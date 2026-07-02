@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, Upload, Image, Bell, LogOut, Home, ChevronRight, Menu, X, Sun, Moon, CheckCircle, Clock } from 'lucide-react';
 import './MediaDashboard.css';
 
-const API = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API = process.env.REACT_APP_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : 'https://sivam-trust.vercel.app');
 
 export default function MediaDashboard() {
   const navigate = useNavigate();

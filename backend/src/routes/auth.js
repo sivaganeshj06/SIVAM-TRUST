@@ -98,6 +98,18 @@ router.post('/login', async (req, res) => {
 
   auditLogger.info('AUTH_SUCCESS', { userId: member.id, role: resolvedRole, ip: req.ip });
 
+  try {
+    const { createNotification, createNotificationForRole } = require('../utils/notificationService');
+    // Log self login
+    await createNotification(member.id, 'security', 'Successful Login', `A login was recorded from IP ${req.ip} on ${new Date().toLocaleString('en-IN')}.`);
+    // Notify founder
+    if (member.role !== 'founder') {
+      await createNotificationForRole('founder', 'security', 'Member Login Alert', `${member.name} (${resolvedRole}) logged in from IP ${req.ip}.`);
+    }
+  } catch (err) {
+    auditLogger.error('LOGIN_NOTIFICATION_FAILED', { error: err.message });
+  }
+
   // Store refresh token in secure HttpOnly cookie
   res.cookie('refresh_token', refreshToken, {
     httpOnly: true,

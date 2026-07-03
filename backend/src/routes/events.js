@@ -91,9 +91,17 @@ router.post('/', protect, requireRole('founder', 'co-founder'), eventValidation,
     .insert([{ title, description, event_date, end_date, location, status: 'upcoming' }])
     .select()
 
-  if (error) return res.status(500).json({ error: error.message })
-  
   auditLogger.info('EVENT_CREATED', { creatorId: req.user.id, eventId: data[0].id, title });
+
+  if (req.user.role !== 'founder') {
+    try {
+      const { createNotificationForRole } = require('../utils/notificationService');
+      await createNotificationForRole('founder', 'event', 'New Event Created', `Co-founder ${req.user.name} created a new event: "${title}".`);
+    } catch (err) {
+      auditLogger.error('EVENT_NOTIFICATION_FAILED', { error: err.message });
+    }
+  }
+
   res.json({ success: true, data })
 })
 
@@ -112,9 +120,17 @@ router.put('/:id', protect, requireRole('founder', 'co-founder'), validateEventI
     .eq('id', req.params.id)
     .select()
 
-  if (error) return res.status(500).json({ error: error.message })
-  
   auditLogger.info('EVENT_UPDATED', { creatorId: req.user.id, eventId: req.params.id });
+
+  if (req.user.role !== 'founder') {
+    try {
+      const { createNotificationForRole } = require('../utils/notificationService');
+      await createNotificationForRole('founder', 'event', 'Event Updated', `Co-founder ${req.user.name} updated event: "${title}".`);
+    } catch (err) {
+      auditLogger.error('EVENT_NOTIFICATION_FAILED', { error: err.message });
+    }
+  }
+
   res.json({ success: true, data })
 })
 

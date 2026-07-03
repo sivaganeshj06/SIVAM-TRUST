@@ -99,8 +99,25 @@ const sendPasswordResetEmail = async (email, resetLink) => {
   });
 };
 
+const sendGenericNotificationEmail = async (email, { title, message }) => {
+  return sendMail({
+    to: email,
+    subject: `🔔 Trust Portal: ${title}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #ffffff;">
+        <h2 style="color: #2563eb; margin-top: 0; font-weight: 800;">Sivam Trust Foundation</h2>
+        <h3 style="color: #0f172a; font-weight: 700; margin-bottom: 12px;">${title}</h3>
+        <p style="color: #334155; line-height: 1.6; font-size: 15px; margin: 0 0 20px;">${message}</p>
+        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
+        <p style="font-size: 11px; color: #94a3b8; margin: 0;">This is an automated notification from the Sivam Trust Enterprise Portal. Please do not reply directly to this email.</p>
+      </div>
+    `
+  });
+};
+
 module.exports = {
   sendLoginNotification,
   sendDonationNotification,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  sendGenericNotificationEmail
 };

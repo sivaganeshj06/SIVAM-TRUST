@@ -55,6 +55,13 @@ router.post('/', contactValidation, async (req, res) => {
     return res.status(500).json({ error: error.message })
   }
 
+  try {
+    const { createNotificationForRole } = require('../utils/notificationService');
+    await createNotificationForRole('founder', 'message', 'New Contact Message', `You received a message from ${name} (${email}).`);
+  } catch (err) {
+    console.error('Contact notification error:', err);
+  }
+
   res.json({ success: true, message: 'Message sent successfully!' })
 })
 

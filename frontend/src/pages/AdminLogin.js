@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import logo from '../assets/LOGO.png'
-
-const API = process.env.REACT_APP_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : 'https://sivam-trust.vercel.app');
+import { API } from '../utils/api';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function AdminLogin() {
   const navigate = useNavigate()
@@ -11,6 +11,7 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -131,23 +132,46 @@ export default function AdminLogin() {
             <label style={{ fontSize: '12px', color: '#374151', display: 'block', marginBottom: '6px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               Password
             </label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              style={{
-                width: '100%', padding: '12px 14px',
-                border: '1.5px solid #e2e8f0', borderRadius: '12px',
-                fontSize: '14px', boxSizing: 'border-box',
-                outline: 'none', fontFamily: 'inherit',
-                background: '#f8fafc', color: '#0f172a',
-                transition: 'border-color 0.2s',
-              }}
-              onFocus={e => e.target.style.borderColor = '#2563eb'}
-              onBlur={e => e.target.style.borderColor = '#e2e8f0'}
-            />
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                style={{
+                  width: '100%', padding: '12px 42px 12px 14px',
+                  border: '1.5px solid #e2e8f0', borderRadius: '12px',
+                  fontSize: '14px', boxSizing: 'border-box',
+                  outline: 'none', fontFamily: 'inherit',
+                  background: '#f8fafc', color: '#0f172a',
+                  transition: 'border-color 0.2s',
+                }}
+                onFocus={e => e.target.style.borderColor = '#2563eb'}
+                onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#94a3b8',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '4px',
+                  outline: 'none'
+                }}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
           {error && (

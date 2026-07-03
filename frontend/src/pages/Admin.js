@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import './Admin.css';
-
-const API = process.env.REACT_APP_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : 'https://sivam-trust.vercel.app');
+import { API } from '../utils/api';
 
 function Admin() {
   const [donations, setDonations] = useState([]);

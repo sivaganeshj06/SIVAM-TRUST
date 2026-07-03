@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import './Events.css';
-
-const API = 'https://sivam-trust.vercel.app';
+import { API } from '../utils/api';
 
 export default function Events() {
   const [events, setEvents] = useState([]);

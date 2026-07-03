@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import './Contact.css';
-
-const API = 'https://sivam-trust.vercel.app';
+import { API } from '../utils/api';
 
 const contactInfo = [
   { icon: '📞', title: 'Phone', lines: ['79045 71160', '96005 05873'] },

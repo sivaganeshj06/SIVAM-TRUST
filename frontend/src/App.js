@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Donate from './pages/Donate';
 import Events from './pages/Events';
@@ -15,10 +15,14 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { setupAxiosInterceptors, setupIdleTimeout, setupAbsoluteTimeout } from './utils/securityManager';
+import LoadingScreen from './components/LoadingScreen';
 import './App.css';
 
 function SecurityWrapper({ children }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [pageLoading, setPageLoading] = useState(false);
+  const prevPathRef = useRef(location.pathname);
 
   useEffect(() => {
     // Setup global Axios interceptors for token auto-refresh & 401/403 redirects
@@ -34,7 +38,23 @@ function SecurityWrapper({ children }) {
     };
   }, [navigate]);
 
-  return children;
+  useEffect(() => {
+    if (location.pathname !== prevPathRef.current) {
+      setPageLoading(true);
+      prevPathRef.current = location.pathname;
+      const timer = setTimeout(() => {
+        setPageLoading(false);
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [location]);
+
+  return (
+    <>
+      {pageLoading && <LoadingScreen fullPage={true} />}
+      {children}
+    </>
+  );
 }
 
 function AdminRedirect() {

@@ -49,21 +49,24 @@ app.use((req, res, next) => {
 // ===== CORS SECURE CONFIGURATION =====
 const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000').split(',').map(o => o.trim());
 
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
-      callback(null, true);
-    } else {
-      auditLogger.warn('CORS_BLOCKED', { origin, ip: req.ip });
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-}))
+const corsOptionsDelegate = (req, callback) => {
+  const origin = req.header('Origin');
+  let corsOptions;
+  if (!origin) {
+    corsOptions = { origin: true };
+  } else if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+    corsOptions = { origin: true };
+  } else {
+    auditLogger.warn('CORS_BLOCKED', { origin, ip: req.ip });
+    corsOptions = { origin: false };
+  }
+  corsOptions.methods = ['GET', 'POST', 'PUT', 'DELETE'];
+  corsOptions.allowedHeaders = ['Content-Type', 'Authorization'];
+  corsOptions.credentials = true;
+  callback(null, corsOptions);
+};
+
+app.use(cors(corsOptionsDelegate))
 
 // ===== LOGGING =====
 app.use(morgan('dev'))
@@ -107,6 +110,9 @@ app.use('/api/events', require('./routes/events'))
 app.use('/api/contact', require('./routes/contact'))
 app.use('/api/photos', require('./routes/photos'))
 app.use('/api/members', require('./routes/members'))
+
+const { protect } = require('./middleware/authMiddleware')
+app.use('/api/notifications', protect, require('./routes/notifications'))
 
 // ===== HEALTH CHECK =====
 app.get('/', (req, res) => {

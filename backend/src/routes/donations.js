@@ -85,6 +85,14 @@ router.post('/', donationValidation, async (req, res) => {
 
   auditLogger.info('DONATION_SUBMITTED', { donationId: data[0].id, amount });
 
+  try {
+    const { createNotificationForRole } = require('../utils/notificationService');
+    await createNotificationForRole('founder', 'donation', 'New Donation Registered', `A pending donation of ₹${amount} was registered by ${donor_name}.`);
+    await createNotificationForRole('accountant', 'donation', 'New Donation Registered', `A pending donation of ₹${amount} was registered by ${donor_name}.`);
+  } catch (err) {
+    auditLogger.error('DONATION_NOTIFICATION_FAILED', { error: err.message });
+  }
+
   // Send email notification
   await sendDonationNotification({ donor_name, email, phone, amount, payment_status: 'pending' })
 
@@ -120,9 +128,16 @@ router.put('/:id', protect, requireRole('founder', 'accountant'), validateDonati
     .eq('id', req.params.id)
     .select()
 
-  if (error) return res.status(500).json({ error: error.message })
-  
   auditLogger.info('DONATION_UPDATED', { updaterId: req.user.id, donationId: req.params.id, status: payment_status });
+
+  try {
+    const { createNotificationForRole } = require('../utils/notificationService');
+    await createNotificationForRole('founder', 'donation', 'Donation Status Updated', `The status of donation from ${data[0].donor_name} of ₹${data[0].amount} has been updated to "${payment_status}".`);
+    await createNotificationForRole('accountant', 'donation', 'Donation Status Updated', `The status of donation from ${data[0].donor_name} of ₹${data[0].amount} has been updated to "${payment_status}".`);
+  } catch (err) {
+    auditLogger.error('DONATION_UPDATE_NOTIFICATION_FAILED', { error: err.message });
+  }
+
   res.json({ success: true, data: data[0] })
 })
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/LOGO.png';
+import { API } from '../utils/api';
 import './Login.css';
 
 function Login() {
@@ -16,7 +17,7 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('https://sivam-trust.vercel.app/api/auth/login', form);
+      const res = await axios.post(`${API}/api/auth/login`, form);
       localStorage.setItem('token', res.data.token);
       navigate('/admin');
     } catch (err) {

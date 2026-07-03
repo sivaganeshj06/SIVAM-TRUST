@@ -1,6 +1,5 @@
 import axios from 'axios';
-
-const API = process.env.REACT_APP_API_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : 'https://sivam-trust.vercel.app');
+import { API } from './api';
 
 const getJwtExpiry = (token) => {
   try {

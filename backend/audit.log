@@ -3,3 +3,9 @@
 [2026-07-02T19:01:32.810Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
 [2026-07-02T19:02:41.382Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
 [2026-07-02T19:07:06.676Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
+[2026-07-03T07:03:16.959Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
+[2026-07-03T07:04:25.810Z] [WARN] [AUTH_FAILED] - {"reason":"Password mismatch","reference_number":"STF/2026/FOU","ip":"::1"}
+[2026-07-03T07:04:48.373Z] [INFO] [AUTH_SUCCESS] - {"userId":"987007be-d398-44a2-9e4e-489049d56264","role":"founder","ip":"::1"}
+[2026-07-03T07:07:14.006Z] [INFO] [AUTH_SUCCESS] - {"userId":"987007be-d398-44a2-9e4e-489049d56264","role":"founder","ip":"::1"}
+[2026-07-03T07:08:03.709Z] [INFO] [EMAIL_LOGGED] - {"to":"founder@sivamtrust.org","subject":"⚠️ Login Alert: Santhosh S (co-founder-1)"}
+[2026-07-03T07:08:03.710Z] [INFO] [AUTH_SUCCESS] - {"userId":"9289082d-b77a-44d7-9ad3-0b4fe04f9621","role":"co-founder-1","ip":"::1"}

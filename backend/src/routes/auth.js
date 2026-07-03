@@ -114,7 +114,7 @@ router.post('/login', async (req, res) => {
   res.cookie('refresh_token', refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
     maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days in ms
   });
 
@@ -145,7 +145,11 @@ router.post('/refresh-token', async (req, res) => {
     if (!isRefreshTokenActive(refreshToken)) {
       // Reuse detected! Breach prevention: revoke all tokens for this user
       revokeAllUserTokens(decoded.id);
-      res.clearCookie('refresh_token');
+      res.clearCookie('refresh_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict'
+      });
       auditLogger.warn('TOKEN_REUSE_DETECTED', { userId: decoded.id, ip: req.ip });
       return res.status(401).json({ error: 'Session compromised. Please re-authenticate.' });
     }
@@ -159,7 +163,11 @@ router.post('/refresh-token', async (req, res) => {
 
     if (error || !member) {
       revokeRefreshToken(refreshToken);
-      res.clearCookie('refresh_token');
+      res.clearCookie('refresh_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict'
+      });
       return res.status(401).json({ error: 'User not found or inactive' });
     }
 
@@ -181,7 +189,7 @@ router.post('/refresh-token', async (req, res) => {
     res.cookie('refresh_token', tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
@@ -198,7 +206,11 @@ router.post('/refresh-token', async (req, res) => {
 
   } catch (err) {
     auditLogger.warn('REFRESH_FAILED', { error: err.message, ip: req.ip });
-    res.clearCookie('refresh_token');
+    res.clearCookie('refresh_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict'
+    });
     return res.status(401).json({ error: 'Invalid or expired refresh token' });
   }
 });
@@ -217,7 +229,11 @@ router.post('/logout', (req, res) => {
     blacklistAccessToken(accessToken);
   }
 
-  res.clearCookie('refresh_token');
+  res.clearCookie('refresh_token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict'
+  });
   res.json({ success: true, message: 'Logged out successfully' })
 })
 

@@ -32,3 +32,11 @@
 [2026-07-03T08:05:40.929Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
 [2026-07-03T08:05:55.620Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
 [2026-07-03T08:06:09.575Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
+[2026-07-03T08:24:32.962Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
+[2026-07-03T08:25:30.285Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
+[2026-07-03T08:25:52.801Z] [INFO] [AUTH_SUCCESS] - {"userId":"987007be-d398-44a2-9e4e-489049d56264","role":"founder","ip":"::1"}
+[2026-07-03T08:25:53.103Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"Could not find the table 'public.notifications' in the schema cache","userId":"987007be-d398-44a2-9e4e-489049d56264"}
+[2026-07-03T08:26:43.746Z] [INFO] [EMAIL_LOGGED] - {"to":"founder@sivamtrust.org","subject":"⚠️ Login Alert: Santhosh S (co-founder-1)"}
+[2026-07-03T08:26:43.747Z] [INFO] [AUTH_SUCCESS] - {"userId":"9289082d-b77a-44d7-9ad3-0b4fe04f9621","role":"co-founder-1","ip":"::1"}
+[2026-07-03T08:26:43.995Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"Could not find the table 'public.notifications' in the schema cache","userId":"9289082d-b77a-44d7-9ad3-0b4fe04f9621"}
+[2026-07-03T08:26:44.600Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"Could not find the table 'public.notifications' in the schema cache","userId":"987007be-d398-44a2-9e4e-489049d56264"}

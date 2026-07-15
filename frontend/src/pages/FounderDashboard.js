@@ -41,7 +41,7 @@ export default function FounderDashboard() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('overview');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
   const [darkMode, setDarkMode] = useState(false);
   const [donations, setDonations] = useState([]);
   const [events, setEvents] = useState([]);
@@ -185,6 +185,21 @@ export default function FounderDashboard() {
 
   return (
     <div className={`fdx-root ${darkMode ? 'dark' : ''}`}>
+      {/* Mobile Overlay */}
+      <div 
+        className={`fdx-mobile-overlay ${sidebarOpen ? 'show' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+      />
+      
+      {/* Mobile Menu Button (Bottom Right) */}
+      <button 
+        className="fdx-mobile-menu-btn"
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        aria-label="Toggle Menu"
+      >
+        {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+
       <motion.aside className={`fdx-sidebar ${sidebarOpen ? 'open' : 'closed'}`}
         initial={{ x: -240 }} animate={{ x: 0 }} transition={{ duration: 0.5, ease: [0.22,1,0.36,1] }}>
         <div className="fdx-sidebar-header">

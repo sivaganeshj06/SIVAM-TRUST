@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Connection Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2563eb; }
+        h2 { color: #334155; font-size: 18px; }
+        .status { padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .success { background: #d1fae5; color: #065f46; }
+        .error { background: #fee2e2; color: #991b1b; }
+        .warning { background: #fef3c7; color: #92400e; }
+        .info { background: #dbeafe; color: #1e40af; }
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        button:hover { background: #1d4ed8; }
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .code { 
+            background: #f1f5f9; 
+            padding: 2px 6px; 
+            border-radius: 3px; 
+            font-family: monospace; 
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Dashboard Connection Diagnostic</h1>
+    
+    <div class="card">
+        <h2>Step 1: Check Authentication</h2>
+        <button onclick="checkAuth()">Check Login Status</button>
+        <div id="authStatus"></div>
+    </div>
+
+    <div class="card">
+        <h2>Step 2: Test Backend Connection</h2>
+        <button onclick="testBackend()">Test Backend Health</button>
+        <div id="backendStatus"></div>
+    </div>
+
+    <div class="card">
+        <h2>Step 3: Fetch Dashboard Data</h2>
+        <button onclick="fetchDonations()">Fetch Donations</button>
+        <button onclick="fetchEvents()">Fetch Events</button>
+        <button onclick="fetchMembers()">Fetch Members</button>
+        <button onclick="fetchContacts()">Fetch Contacts</button>
+        <div id="dataStatus"></div>
+    </div>
+
+    <div class="card">
+        <h2>Step 4: Login (If Not Logged In)</h2>
+        <p>If you're not logged in, you need to:</p>
+        <ol>
+            <li>Go to <span class="code">http://localhost:3000/admin/login</span></li>
+            <li>Login with your credentials</li>
+            <li>Come back here and test again</li>
+        </ol>
+        <button onclick="window.open('http://localhost:3000/admin/login', '_blank')">Open Login Page</button>
+    </div>
+
+    <div class="card">
+        <h2>Test Results</h2>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000';
+
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = message;
+            results.appendChild(div);
+        }
+
+        function checkAuth() {
+            const authDiv = document.getElementById('authStatus');
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('trust_user');
+            
+            if (!token || !user) {
+                authDiv.innerHTML = `
+                    <div class="status error">
+                        ❌ NOT LOGGED IN
+                        <p>You need to login first!</p>
+                    </div>
+                `;
+                log('❌ Authentication check failed: No token found', 'error');
+            } else {
+                try {
+                    const userData = JSON.parse(user);
+                    authDiv.innerHTML = `
+                        <div class="status success">
+                            ✅ LOGGED IN
+                            <p><strong>Name:</strong> ${userData.name}</p>
+                            <p><strong>Role:</strong> ${userData.role}</p>
+                            <p><strong>Email:</strong> ${userData.email}</p>
+                        </div>
+                        <div class="status info">
+                            <strong>Token:</strong> ${token.substring(0, 50)}...
+                        </div>
+                    `;
+                    log(`✅ Logged in as ${userData.name} (${userData.role})`, 'success');
+                } catch (e) {
+                    authDiv.innerHTML = `
+                        <div class="status error">
+                            ❌ INVALID USER DATA
+                            <p>User data is corrupted. Please login again.</p>
+                        </div>
+                    `;
+                    log('❌ User data corrupted', 'error');
+                }
+            }
+        }
+
+        async function testBackend() {
+            const backendDiv = document.getElementById('backendStatus');
+            backendDiv.innerHTML = '<div class="status info">⏳ Testing backend connection...</div>';
+            
+            try {
+                const response = await fetch(`${API_URL}/`);
+                const data = await response.json();
+                
+                if (data.status === 'healthy') {
+                    backendDiv.innerHTML = `
+                        <div class="status success">
+                            ✅ BACKEND IS RUNNING
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                    log('✅ Backend is healthy and responding', 'success');
+                } else {
+                    backendDiv.innerHTML = `
+                        <div class="status warning">
+                            ⚠️ Backend responded but status is not healthy
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                    log('⚠️ Backend status unclear', 'warning');
+                }
+            } catch (error) {
+                backendDiv.innerHTML = `
+                    <div class="status error">
+                        ❌ BACKEND NOT ACCESSIBLE
+                        <p>Error: ${error.message}</p>
+                        <p>Make sure backend is running on <span class="code">http://localhost:5000</span></p>
+                    </div>
+                `;
+                log(`❌ Backend connection failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function fetchData(endpoint, label) {
+            const dataDiv = document.getElementById('dataStatus');
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                dataDiv.innerHTML = '<div class="status error">❌ No token found. Please login first!</div>';
+                log(`❌ Cannot fetch ${label}: Not logged in`, 'error');
+                return;
+            }
+            
+            dataDiv.innerHTML = `<div class="status info">⏳ Fetching ${label}...</div>`;
+            
+            try {
+                const response = await fetch(`${API_URL}${endpoint}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.status === 401) {
+                    dataDiv.innerHTML = `
+                        <div class="status error">
+                            ❌ UNAUTHORIZED (401)
+                            <p>Your token is invalid or expired. Please login again!</p>
+                        </div>
+                    `;
+                    log(`❌ ${label}: Token invalid (401)`, 'error');
+                    return;
+                }
+                
+                if (response.status === 403) {
+                    dataDiv.innerHTML = `
+                        <div class="status error">
+                            ❌ FORBIDDEN (403)
+                            <p>You don't have permission to access this resource.</p>
+                        </div>
+                    `;
+                    log(`❌ ${label}: Permission denied (403)`, 'error');
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                if (Array.isArray(data)) {
+                    dataDiv.innerHTML = `
+                        <div class="status success">
+                            ✅ SUCCESS: Found ${data.length} ${label}
+                            <pre>${JSON.stringify(data.slice(0, 2), null, 2)}${data.length > 2 ? '\n... and ' + (data.length - 2) + ' more' : ''}</pre>
+                        </div>
+                    `;
+                    log(`✅ ${label}: ${data.length} records fetched`, 'success');
+                } else {
+                    dataDiv.innerHTML = `
+                        <div class="status warning">
+                            ⚠️ Unexpected response format
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                    log(`⚠️ ${label}: Unexpected format`, 'warning');
+                }
+            } catch (error) {
+                dataDiv.innerHTML = `
+                    <div class="status error">
+                        ❌ FETCH FAILED
+                        <p>Error: ${error.message}</p>
+                    </div>
+                `;
+                log(`❌ ${label}: ${error.message}`, 'error');
+            }
+        }
+
+        function fetchDonations() { fetchData('/api/donations', 'Donations'); }
+        function fetchEvents() { fetchData('/api/events', 'Events'); }
+        function fetchMembers() { fetchData('/api/members', 'Members'); }
+        function fetchContacts() { fetchData('/api/contact', 'Contacts'); }
+
+        // Auto-run on load
+        window.addEventListener('load', () => {
+            log('🚀 Dashboard Connection Test Started', 'info');
+            checkAuth();
+        });
+    </script>
+</body>
+</html>

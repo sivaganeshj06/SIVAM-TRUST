@@ -81,14 +81,14 @@ export const translations = {
     // Impact
     feedsFamily: 'Feeds a family for a day',
     schoolSupplies: 'School supplies for a child',
-    medicalAid: 'Medical aid for one person',
-    basicNeeds: 'Basic needs for a week',
+    medicalAidImpact: 'Medical aid for one person',
+    basicNeedsWeek: 'Basic needs for a week',
     
     // Reasons
     provideFood: 'Provide food to hungry families',
     supportEducation: 'Support education for children',
     helpMedical: 'Help with medical needs',
-    basicNeeds: 'Basic needs for the homeless',
+    basicNeedsHomeless: 'Basic needs for the homeless',
     communityDev: 'Community development programs',
     
     // Bank Details
@@ -251,14 +251,14 @@ export const translations = {
     // தாக்கம்
     feedsFamily: 'ஒரு குடும்பத்திற்கு ஒரு நாள் உணவு',
     schoolSupplies: 'ஒரு குழந்தைக்கு பள்ளி பொருட்கள்',
-    medicalAid: 'ஒரு நபருக்கு மருத்துவ உதவி',
-    basicNeeds: 'ஒரு வாரத்திற்கு அடிப்படை தேவைகள்',
+    medicalAidImpact: 'ஒரு நபருக்கு மருத்துவ உதவி',
+    basicNeedsWeek: 'ஒரு வாரத்திற்கு அடிப்படை தேவைகள்',
     
     // காரணங்கள்
     provideFood: 'பசியுள்ள குடும்பங்களுக்கு உணவு வழங்குங்கள்',
     supportEducation: 'குழந்தைகளுக்கு கல்விக்கு ஆதரவு',
     helpMedical: 'மருத்துவ தேவைகளுக்கு உதவுங்கள்',
-    basicNeeds: 'வீடற்றவர்களுக்கு அடிப்படை தேவைகள்',
+    basicNeedsHomeless: 'வீடற்றவர்களுக்கு அடிப்படை தேவைகள்',
     communityDev: 'சமூக மேம்பாட்டு திட்டங்கள்',
     
     // வங்கி விவரங்கள்
@@ -421,14 +421,14 @@ export const translations = {
     // प्रभाव
     feedsFamily: 'एक परिवार को एक दिन का भोजन',
     schoolSupplies: 'एक बच्चे के लिए स्कूल सामग्री',
-    medicalAid: 'एक व्यक्ति के लिए चिकित्सा सहायता',
-    basicNeeds: 'एक सप्ताह की बुनियादी जरूरतें',
+    medicalAidImpact: 'एक व्यक्ति के लिए चिकित्सा सहायता',
+    basicNeedsWeek: 'एक सप्ताह की बुनियादी जरूरतें',
     
     // कारण
     provideFood: 'भूखे परिवारों को भोजन प्रदान करें',
     supportEducation: 'बच्चों की शिक्षा का समर्थन करें',
     helpMedical: 'चिकित्सा जरूरतों में मदद करें',
-    basicNeeds: 'बेघरों के लिए बुनियादी जरूरतें',
+    basicNeedsHomeless: 'बेघरों के लिए बुनियादी जरूरतें',
     communityDev: 'सामुदायिक विकास कार्यक्रम',
     
     // बैंक विवरण

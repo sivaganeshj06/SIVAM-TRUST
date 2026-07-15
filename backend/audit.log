@@ -93,3 +93,35 @@
 [2026-07-15T10:17:49.439Z] [INFO] [AUTH_SUCCESS] - {"userId":"9289082d-b77a-44d7-9ad3-0b4fe04f9621","role":"co-founder-1","ip":"::1"}
 [2026-07-15T10:17:49.693Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"9289082d-b77a-44d7-9ad3-0b4fe04f9621"}
 [2026-07-15T10:17:50.311Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"987007be-d398-44a2-9e4e-489049d56264"}
+[2026-07-15T10:28:06.398Z] [INFO] [AUTH_SUCCESS] - {"userId":"987007be-d398-44a2-9e4e-489049d56264","role":"founder","ip":"::1"}
+[2026-07-15T10:28:07.016Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"987007be-d398-44a2-9e4e-489049d56264"}
+[2026-07-15T10:31:42.044Z] [INFO] [AUTH_SUCCESS] - {"userId":"987007be-d398-44a2-9e4e-489049d56264","role":"founder","ip":"::1"}
+[2026-07-15T10:31:42.286Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"987007be-d398-44a2-9e4e-489049d56264"}
+[2026-07-15T10:41:11.366Z] [INFO] [AUTH_SUCCESS] - {"userId":"987007be-d398-44a2-9e4e-489049d56264","role":"founder","ip":"::1"}
+[2026-07-15T10:41:12.073Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"987007be-d398-44a2-9e4e-489049d56264"}
+[2026-07-15T10:43:00.964Z] [INFO] [AUTH_SUCCESS] - {"userId":"987007be-d398-44a2-9e4e-489049d56264","role":"founder","ip":"::1"}
+[2026-07-15T10:43:01.669Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"987007be-d398-44a2-9e4e-489049d56264"}
+[2026-07-15T11:02:23.621Z] [INFO] [AUTH_SUCCESS] - {"userId":"987007be-d398-44a2-9e4e-489049d56264","role":"founder","ip":"::1"}
+[2026-07-15T11:02:24.188Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"987007be-d398-44a2-9e4e-489049d56264"}
+[2026-07-15T11:04:04.282Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
+[2026-07-15T11:04:07.069Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
+[2026-07-15T11:04:34.470Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
+[2026-07-15T11:04:38.238Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
+[2026-07-15T11:05:21.044Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
+[2026-07-15T11:05:33.944Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
+[2026-07-15T11:06:43.160Z] [WARN] [AUTH_BLOCKED] - {"reason":"Invalid or expired token","error":"jwt malformed","ip":"::1"}
+[2026-07-15T11:12:34.323Z] [INFO] [DONATION_SUBMITTED] - {"donationId":"7d49fe46-115f-4f26-b50c-29b1ee273455","amount":"1000"}
+[2026-07-15T11:12:37.156Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"987007be-d398-44a2-9e4e-489049d56264"}
+[2026-07-15T11:12:40.942Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"8102dde9-0f6a-4262-b099-c2d12c61f9d6"}
+[2026-07-15T11:12:40.944Z] [INFO] [EMAIL_LOGGED] - {"to":"notifications@sivamtrust.org","subject":"💰 New Donation Pending: ₹1000"}
+[2026-07-15T11:13:36.667Z] [INFO] [AUTH_SUCCESS] - {"userId":"987007be-d398-44a2-9e4e-489049d56264","role":"founder","ip":"::1"}
+[2026-07-15T11:13:37.057Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"987007be-d398-44a2-9e4e-489049d56264"}
+[2026-07-15T11:18:52.528Z] [INFO] [EMAIL_LOGGED] - {"to":"founder@sivamtrust.org","subject":"⚠️ Login Alert: Santhosh S (co-founder-1)"}
+[2026-07-15T11:18:52.529Z] [INFO] [AUTH_SUCCESS] - {"userId":"9289082d-b77a-44d7-9ad3-0b4fe04f9621","role":"co-founder-1","ip":"::1"}
+[2026-07-15T11:18:52.863Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"9289082d-b77a-44d7-9ad3-0b4fe04f9621"}
+[2026-07-15T11:18:53.477Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"987007be-d398-44a2-9e4e-489049d56264"}
+[2026-07-15T11:31:33.005Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
+[2026-07-15T13:49:45.164Z] [INFO] [SERVER_STARTED] - {"port":"5000","env":"development"}
+[2026-07-15T13:49:50.128Z] [INFO] [AUTH_SUCCESS] - {"userId":"987007be-d398-44a2-9e4e-489049d56264","role":"founder","ip":"::1"}
+[2026-07-15T13:49:50.948Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"987007be-d398-44a2-9e4e-489049d56264"}
+[2026-07-15T13:52:42.944Z] [INFO] [SERVER_STARTED] - {"port":"5000","env":"development"}

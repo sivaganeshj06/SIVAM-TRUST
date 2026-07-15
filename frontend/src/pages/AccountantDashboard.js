@@ -26,7 +26,7 @@ export default function AccountantDashboard() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('overview');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
   const [darkMode, setDarkMode] = useState(false);
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -157,6 +157,21 @@ export default function AccountantDashboard() {
 
   return (
     <div className={`acx-root ${darkMode ? 'dark' : ''}`}>
+      {/* Mobile Overlay */}
+      <div 
+        className={`acx-mobile-overlay ${sidebarOpen ? 'show' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+      />
+      
+      {/* Mobile Menu Button (Bottom Right) */}
+      <button 
+        className="acx-mobile-menu-btn"
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        aria-label="Toggle Menu"
+      >
+        {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+
       <motion.aside className={`acx-sidebar ${sidebarOpen ? 'open' : 'closed'}`} initial={{ x: -240 }} animate={{ x: 0 }} transition={{ duration: 0.5 }}>
         <div className="acx-sidebar-header">
           <div className="acx-logo">ST</div>{sidebarOpen && <span className="acx-logo-text">Sivam Trust</span>}

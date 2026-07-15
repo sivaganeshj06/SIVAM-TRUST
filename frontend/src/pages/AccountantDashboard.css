@@ -102,9 +102,16 @@
 .acx-report-card.teal { background: #f0fdfa; color: #134e4a; }
 
 @media (max-width: 768px) {
-  .acx-sidebar { position: fixed; z-index: 100; height: 100vh; }
-  .acx-sidebar.closed { width: 0; }
+  .acx-root { position: relative; }
+  .acx-sidebar { position: fixed; z-index: 100; height: 100vh; transform: translateX(-100%); transition: transform 0.3s ease; }
+  .acx-sidebar.open { transform: translateX(0); box-shadow: 4px 0 20px rgba(0,0,0,0.2); }
+  .acx-sidebar.closed { transform: translateX(-100%); }
+  .acx-main { width: 100%; }
+  .acx-mobile-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; display: none; }
+  .acx-mobile-overlay.show { display: block; }
+  .acx-mobile-menu-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: #f1f5f9; border: none; border-radius: 10px; cursor: pointer; color: #475569; }
   .acx-charts-row { flex-direction: column; }
   .acx-stats-grid { grid-template-columns: repeat(2, 1fr); }
   .acx-content { padding: 1rem; }
+  .acx-header { padding: 0.75rem 1rem; }
 }

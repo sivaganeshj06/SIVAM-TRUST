@@ -14,6 +14,9 @@ import {
 import './FounderDashboard.css';
 import { API } from '../utils/api';
 import LoadingScreen from '../components/LoadingScreen';
+import BackButton from '../components/BackButton';
+import LanguageSelector from '../components/LanguageSelector';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function Counter({ target, prefix = '', suffix = '' }) {
   const [count, setCount] = useState(0);
@@ -36,6 +39,7 @@ function Counter({ target, prefix = '', suffix = '' }) {
 
 export default function FounderDashboard() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
@@ -79,7 +83,16 @@ export default function FounderDashboard() {
   };
 
   useEffect(() => {
-    if (!token || trustUser?.role !== 'founder') { navigate('/access-denied'); return; }
+    if (!token || !trustUser?.role) {
+      navigate('/admin/login', { replace: true });
+      return;
+    }
+    
+    if (trustUser.role !== 'founder') {
+      navigate('/access-denied', { replace: true });
+      return;
+    }
+    
     fetchAll();
     fetchNotifications();
 
@@ -95,6 +108,11 @@ export default function FounderDashboard() {
       } catch (err) {
         console.error('Error parsing SSE data:', err);
       }
+    };
+
+    eventSource.onerror = (error) => {
+      console.error('SSE connection error:', error);
+      eventSource.close();
     };
 
     return () => {
@@ -116,15 +134,23 @@ export default function FounderDashboard() {
       setMembers(mem.data || []);
       setContacts(con.data || []);
     } catch (err) { 
-      if (err.response?.status === 401) navigate('/admin/login'); 
-      else if (err.response?.status === 403) navigate('/access-denied');
+      console.error('Error fetching data:', err);
+      if (err.response?.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('trust_user');
+        navigate('/admin/login', { replace: true });
+      } else if (err.response?.status === 403) {
+        navigate('/access-denied', { replace: true });
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token'); localStorage.removeItem('trust_user');
-    navigate('/admin/login');
+    localStorage.removeItem('token'); 
+    localStorage.removeItem('trust_user');
+    setTimeout(() => navigate('/admin/login', { replace: true }), 200);
   };
 
   const totalDonations = donations.reduce((sum, d) => sum + Number(d.amount || 0), 0);
@@ -133,24 +159,27 @@ export default function FounderDashboard() {
   const completedEvents = events.filter(e => e.status === 'completed').length;
   const activeMembers = members.filter(m => m.status === 'active').length;
 
-  const donationChartData = donations.slice(0, 7).map((d, i) => ({ name: `#${i+1}`, amount: Number(d.amount) })).reverse();
-  const eventStatusData = [{ name: 'Upcoming', value: upcomingEvents, color: '#2563eb' }, { name: 'Completed', value: completedEvents, color: '#10b981' }];
+  const donationChartData = donations.length > 0 ? donations.slice(0, 7).map((d, i) => ({ name: `#${i+1}`, amount: Number(d.amount || 0) })).reverse() : [];
+  const eventStatusData = [
+    { name: t('upcoming'), value: upcomingEvents, color: '#2563eb' }, 
+    { name: t('completed'), value: completedEvents, color: '#10b981' }
+  ];
   const roleData = [
-    { name: 'Founder', count: members.filter(m => m.role === 'founder').length },
-    { name: 'Co-Founder', count: members.filter(m => m.role === 'co-founder').length },
-    { name: 'Accountant', count: members.filter(m => m.role === 'accountant').length },
-    { name: 'Media', count: members.filter(m => m.role === 'media').length },
+    { name: t('founder'), count: members.filter(m => m.role === 'founder').length },
+    { name: t('coFounder'), count: members.filter(m => m.role && m.role.includes('co-founder')).length },
+    { name: t('accountant'), count: members.filter(m => m.role === 'accountant').length },
+    { name: t('media'), count: members.filter(m => m.role === 'media').length },
   ];
 
-  const navItems = [
-    { id: 'overview', label: 'Overview', icon: Home },
-    { id: 'donations', label: 'Donations', icon: Heart },
-    { id: 'events', label: 'Events', icon: Calendar },
-    { id: 'members', label: 'Members', icon: Users },
-    { id: 'messages', label: 'Messages', icon: MessageSquare },
-    { id: 'analytics', label: 'Analytics', icon: TrendingUp },
-    { id: 'audit', label: 'Audit Logs', icon: Shield },
-  ];
+  const navItems = React.useMemo(() => [
+    { id: 'overview', label: t('overview'), icon: Home },
+    { id: 'donations', label: t('donations'), icon: Heart },
+    { id: 'events', label: t('events'), icon: Calendar },
+    { id: 'members', label: t('members'), icon: Users },
+    { id: 'messages', label: t('messages'), icon: MessageSquare },
+    { id: 'analytics', label: t('analytics'), icon: TrendingUp },
+    { id: 'audit', label: t('auditLogs'), icon: Shield },
+  ], [t]);
 
   if (loading) return <LoadingScreen fullPage={true} />;
 
@@ -184,18 +213,22 @@ export default function FounderDashboard() {
             {sidebarOpen && <span>{darkMode ? 'Light' : 'Dark'} Mode</span>}
           </button>
           <button className="fdx-nav-item logout" onClick={handleLogout}>
-            <LogOut size={20} />{sidebarOpen && <span>Logout</span>}
+            <LogOut size={20} />{sidebarOpen && <span>{t('logout')}</span>}
           </button>
         </div>
       </motion.aside>
 
       <main className="fdx-main">
         <motion.header className="fdx-header" initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-          <div>
-            <h1 className="fdx-page-title">{navItems.find(n => n.id === activeTab)?.label}</h1>
-            <p className="fdx-breadcrumb">Dashboard <ChevronRight size={14} /> {navItems.find(n => n.id === activeTab)?.label}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <BackButton darkMode={darkMode} to="/" />
+            <div>
+              <h1 className="fdx-page-title">{navItems.find(n => n.id === activeTab)?.label}</h1>
+              <p className="fdx-breadcrumb">Dashboard <ChevronRight size={14} /> {navItems.find(n => n.id === activeTab)?.label}</p>
+            </div>
           </div>
           <div className="fdx-header-right" style={{ position: 'relative' }}>
+            <LanguageSelector darkMode={darkMode} />
             <motion.div 
               className="fdx-notif-btn" 
               whileHover={{ scale: 1.1 }} 
@@ -287,7 +320,7 @@ export default function FounderDashboard() {
             </AnimatePresence>
             <div className="fdx-user-pill">
               <div className="fdx-user-avatar">{trustUser?.name?.charAt(0)}</div>
-              <div><p className="fdx-user-name">{trustUser?.name}</p><p className="fdx-user-role">Founder</p></div>
+              <div><p className="fdx-user-name">{trustUser?.name}</p><p className="fdx-user-role">{t('founder')}</p></div>
             </div>
           </div>
         </motion.header>
@@ -298,12 +331,12 @@ export default function FounderDashboard() {
               <motion.div key="overview" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.4 }}>
                 <div className="fdx-kpi-grid">
                   {[
-                    { icon: DollarSign, label: 'Total Donations', value: totalDonations, prefix: '₹', color: 'blue', sub: `${donations.length} donors` },
-                    { icon: Users, label: 'Active Members', value: activeMembers, color: 'green', sub: `${members.length} total` },
-                    { icon: Calendar, label: 'Events', value: events.length, color: 'purple', sub: `${upcomingEvents} upcoming` },
-                    { icon: MessageSquare, label: 'Messages', value: contacts.length, color: 'orange', sub: 'From public' },
-                    { icon: Clock, label: 'Pending', value: pendingDonations, color: 'red', sub: 'Donations' },
-                    { icon: CheckCircle, label: 'Completed Events', value: completedEvents, color: 'teal', sub: 'Done' },
+                    { icon: DollarSign, label: t('totalDonations'), value: totalDonations, prefix: '₹', color: 'blue', sub: `${donations.length} ${t('donations').toLowerCase()}` },
+                    { icon: Users, label: t('activeMembers'), value: activeMembers, color: 'green', sub: `${members.length} total` },
+                    { icon: Calendar, label: t('events'), value: events.length, color: 'purple', sub: `${upcomingEvents} ${t('upcoming').toLowerCase()}` },
+                    { icon: MessageSquare, label: t('messages'), value: contacts.length, color: 'orange', sub: 'From public' },
+                    { icon: Clock, label: t('pending'), value: pendingDonations, color: 'red', sub: t('donations') },
+                    { icon: CheckCircle, label: t('completedEvents'), value: completedEvents, color: 'teal', sub: 'Done' },
                   ].map((kpi, i) => (
                     <motion.div key={i} className={`fdx-kpi-card ${kpi.color}`}
                       initial={{ opacity: 0, y: 30, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -358,13 +391,21 @@ export default function FounderDashboard() {
                 <div className="fdx-bottom-row">
                   <motion.div className="fdx-list-card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
                     <div className="fdx-list-header"><h3>Recent Donations</h3><button onClick={() => setActiveTab('donations')} className="fdx-view-all">View All</button></div>
-                    {donations.slice(0, 5).map((d, i) => (
-                      <motion.div className="fdx-list-item" key={d.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.7 + i*0.05 }}>
-                        <div className="fdx-list-avatar">{d.donor_name?.charAt(0)}</div>
-                        <div className="fdx-list-info"><p className="fdx-list-name">{d.donor_name}</p><p className="fdx-list-sub">{new Date(d.created_at).toLocaleDateString('en-IN')}</p></div>
-                        <span className="fdx-amount">₹{Number(d.amount).toLocaleString()}</span>
-                      </motion.div>
-                    ))}
+                    {donations.length === 0 ? (
+                      <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
+                        <Heart size={40} style={{ opacity: 0.3, marginBottom: '12px' }} />
+                        <p style={{ fontSize: '14px', fontWeight: '600', marginBottom: '4px' }}>No donations yet</p>
+                        <p style={{ fontSize: '12px' }}>Donations will appear here once received</p>
+                      </div>
+                    ) : (
+                      donations.slice(0, 5).map((d, i) => (
+                        <motion.div className="fdx-list-item" key={d.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.7 + i*0.05 }}>
+                          <div className="fdx-list-avatar">{d.donor_name?.charAt(0)}</div>
+                          <div className="fdx-list-info"><p className="fdx-list-name">{d.donor_name}</p><p className="fdx-list-sub">{new Date(d.created_at).toLocaleDateString('en-IN')}</p></div>
+                          <span className="fdx-amount">₹{Number(d.amount).toLocaleString()}</span>
+                        </motion.div>
+                      ))
+                    )}
                   </motion.div>
 
                   <motion.div className="fdx-list-card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65 }}>
@@ -425,55 +466,79 @@ export default function FounderDashboard() {
               <motion.div key="donations" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                 <div className="fdx-table-card">
                   <h3>All Donations</h3>
-                  <table className="fdx-table">
-                    <thead><tr><th>Donor</th><th>Email</th><th>Phone</th><th>Amount</th><th>Transaction ID</th><th>Status</th><th>Date</th></tr></thead>
-                    <tbody>
-                      {donations.map((d, i) => (
-                        <motion.tr key={d.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.03 }}>
-                          <td><div className="fdx-table-user"><div className="fdx-mini-avatar">{d.donor_name?.charAt(0)}</div>{d.donor_name}</div></td>
-                          <td>{d.email}</td><td>{d.phone || '-'}</td>
-                          <td><strong>₹{Number(d.amount).toLocaleString()}</strong></td>
-                          <td>{d.transaction_id || '-'}</td>
-                          <td><span className={`fdx-status ${d.payment_status || 'pending'}`}>{d.payment_status || 'pending'}</span></td>
-                          <td>{new Date(d.created_at).toLocaleDateString('en-IN')}</td>
-                        </motion.tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  {donations.length === 0 ? (
+                    <div style={{ padding: '60px 20px', textAlign: 'center', color: '#94a3b8' }}>
+                      <Heart size={60} style={{ opacity: 0.2, marginBottom: '16px' }} />
+                      <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px', color: '#64748b' }}>No Donations Yet</h3>
+                      <p style={{ fontSize: '14px' }}>Donation records will appear here once people start contributing</p>
+                    </div>
+                  ) : (
+                    <table className="fdx-table">
+                      <thead><tr><th>Donor</th><th>Email</th><th>Phone</th><th>Amount</th><th>Transaction ID</th><th>Status</th><th>Date</th></tr></thead>
+                      <tbody>
+                        {donations.map((d, i) => (
+                          <motion.tr key={d.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.03 }}>
+                            <td><div className="fdx-table-user"><div className="fdx-mini-avatar">{d.donor_name?.charAt(0)}</div>{d.donor_name}</div></td>
+                            <td>{d.email}</td><td>{d.phone || '-'}</td>
+                            <td><strong>₹{Number(d.amount).toLocaleString()}</strong></td>
+                            <td>{d.transaction_id || '-'}</td>
+                            <td><span className={`fdx-status ${d.payment_status || 'pending'}`}>{d.payment_status || 'pending'}</span></td>
+                            <td>{new Date(d.created_at).toLocaleDateString('en-IN')}</td>
+                          </motion.tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
                 </div>
               </motion.div>
             )}
 
             {activeTab === 'events' && (
               <motion.div key="events" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-                <div className="fdx-events-grid">
-                  {events.map((e, i) => (
-                    <motion.div key={e.id} className="fdx-event-card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i*0.08 }} whileHover={{ y: -4 }}>
-                      <div className="fdx-event-header">
-                        <span className={`fdx-status ${e.status || 'upcoming'}`}>{e.status || 'upcoming'}</span>
-                        <span className="fdx-event-date">{new Date(e.event_date).toLocaleDateString('en-IN')}</span>
-                      </div>
-                      <h3>{e.title}</h3><p>{e.description}</p>
-                      <div className="fdx-event-footer"><span>📍 {e.location || 'TBD'}</span></div>
-                    </motion.div>
-                  ))}
-                </div>
+                {events.length === 0 ? (
+                  <div style={{ padding: '80px 20px', textAlign: 'center', color: '#94a3b8', background: 'white', borderRadius: '16px' }}>
+                    <Calendar size={70} style={{ opacity: 0.2, marginBottom: '20px' }} />
+                    <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#64748b' }}>No Events Yet</h3>
+                    <p style={{ fontSize: '14px', marginBottom: '20px' }}>Create your first event to get started</p>
+                  </div>
+                ) : (
+                  <div className="fdx-events-grid">
+                    {events.map((e, i) => (
+                      <motion.div key={e.id} className="fdx-event-card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i*0.08 }} whileHover={{ y: -4 }}>
+                        <div className="fdx-event-header">
+                          <span className={`fdx-status ${e.status || 'upcoming'}`}>{e.status || 'upcoming'}</span>
+                          <span className="fdx-event-date">{new Date(e.event_date).toLocaleDateString('en-IN')}</span>
+                        </div>
+                        <h3>{e.title}</h3><p>{e.description}</p>
+                        <div className="fdx-event-footer"><span>📍 {e.location || 'TBD'}</span></div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
               </motion.div>
             )}
 
             {activeTab === 'members' && (
               <motion.div key="members" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-                <div className="fdx-members-grid">
-                  {members.map((m, i) => (
-                    <motion.div key={m.id} className="fdx-member-card" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i*0.08 }} whileHover={{ y: -6 }}>
-                      <div className="fdx-member-avatar">{m.name?.charAt(0)}</div>
-                      <h3>{m.name}</h3><p className="fdx-member-role">{m.role}</p>
-                      <p>{m.email || '-'}</p><p>{m.phone || '-'}</p>
-                      <p className="fdx-member-ref">{m.reference_number}</p>
-                      <span className={`fdx-status ${m.status}`}>{m.status}</span>
-                    </motion.div>
-                  ))}
-                </div>
+                {members.length === 0 ? (
+                  <div style={{ padding: '80px 20px', textAlign: 'center', color: '#94a3b8', background: 'white', borderRadius: '16px' }}>
+                    <Users size={70} style={{ opacity: 0.2, marginBottom: '20px' }} />
+                    <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '8px', color: '#64748b' }}>No Members Yet</h3>
+                    <p style={{ fontSize: '14px' }}>Team members will appear here once added to the system</p>
+                  </div>
+                ) : (
+                  <div className="fdx-members-grid">
+                    {members.map((m, i) => (
+                      <motion.div key={m.id} className="fdx-member-card" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i*0.08 }} whileHover={{ y: -6 }}>
+                        <div className="fdx-member-avatar">{m.name?.charAt(0)}</div>
+                        <h3>{m.name}</h3><p className="fdx-member-role">{m.role}</p>
+                        <p>{m.email || '-'}</p><p>{m.phone || '-'}</p>
+                        <p className="fdx-member-ref">{m.reference_number}</p>
+                        <span className={`fdx-status ${m.status}`}>{m.status}</span>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
               </motion.div>
             )}
 
@@ -481,17 +546,25 @@ export default function FounderDashboard() {
               <motion.div key="messages" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                 <div className="fdx-table-card">
                   <h3>All Messages</h3>
-                  <table className="fdx-table">
-                    <thead><tr><th>Name</th><th>Email</th><th>Message</th><th>Date</th></tr></thead>
-                    <tbody>
-                      {contacts.map((c, i) => (
-                        <motion.tr key={c.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i*0.05 }}>
-                          <td>{c.name}</td><td>{c.email}</td><td>{c.message}</td>
-                          <td>{new Date(c.created_at).toLocaleDateString('en-IN')}</td>
-                        </motion.tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  {contacts.length === 0 ? (
+                    <div style={{ padding: '60px 20px', textAlign: 'center', color: '#94a3b8' }}>
+                      <MessageSquare size={60} style={{ opacity: 0.2, marginBottom: '16px' }} />
+                      <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px', color: '#64748b' }}>No Messages Yet</h3>
+                      <p style={{ fontSize: '14px' }}>Contact form submissions will appear here</p>
+                    </div>
+                  ) : (
+                    <table className="fdx-table">
+                      <thead><tr><th>Name</th><th>Email</th><th>Message</th><th>Date</th></tr></thead>
+                      <tbody>
+                        {contacts.map((c, i) => (
+                          <motion.tr key={c.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i*0.05 }}>
+                            <td>{c.name}</td><td>{c.email}</td><td>{c.message}</td>
+                            <td>{new Date(c.created_at).toLocaleDateString('en-IN')}</td>
+                          </motion.tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
                 </div>
               </motion.div>
             )}

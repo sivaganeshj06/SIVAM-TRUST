@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
 import logo from '../assets/LOGO.png';
+import { useLanguage } from '../contexts/LanguageContext';
 import './Home.css';
 
 function Counter({ target, suffix = '+' }) {
@@ -23,21 +24,23 @@ function Counter({ target, suffix = '+' }) {
   return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
 }
 
-const stats = [
-  { value: 500, label: 'Families Helped', icon: '🏠', color: '#2563eb' },
-  { value: 100, label: 'Events Conducted', icon: '🎯', color: '#10b981' },
-  { value: 1000, label: 'Meals Served', icon: '🍱', color: '#f59e0b' },
-  { value: 50, label: 'Volunteers', icon: '🤝', color: '#8b5cf6' },
-];
-
-const features = [
-  { icon: '❤️', title: 'Food Distribution', desc: 'Providing nutritious meals to hundreds of families every week across the region.', color: '#fef2f2', accent: '#ef4444' },
-  { icon: '🎓', title: 'Education Support', desc: 'Empowering children with books, uniforms, and school supplies for a brighter future.', color: '#eff6ff', accent: '#2563eb' },
-  { icon: '🏥', title: 'Medical Aid', desc: 'Offering free health checkups and medicines to those who cannot afford healthcare.', color: '#f0fdf4', accent: '#10b981' },
-  { icon: '🌊', title: 'Disaster Relief', desc: 'Rapid response teams providing essential support during floods and natural disasters.', color: '#faf5ff', accent: '#8b5cf6' },
-];
-
 export default function Home() {
+  const { t } = useLanguage();
+  
+  const stats = [
+    { value: 500, label: t('familiesHelped'), icon: '🏠', color: '#2563eb' },
+    { value: 100, label: t('eventsConducted'), icon: '🎯', color: '#10b981' },
+    { value: 1000, label: t('mealsServed'), icon: '🍱', color: '#f59e0b' },
+    { value: 50, label: t('volunteers'), icon: '🤝', color: '#8b5cf6' },
+  ];
+
+  const features = [
+    { icon: '❤️', title: t('foodDistribution'), desc: t('foodDistributionDesc'), color: '#fef2f2', accent: '#ef4444' },
+    { icon: '🎓', title: t('educationSupport'), desc: t('educationSupportDesc'), color: '#eff6ff', accent: '#2563eb' },
+    { icon: '🏥', title: t('medicalAid'), desc: t('medicalAidDesc'), color: '#f0fdf4', accent: '#10b981' },
+    { icon: '🌊', title: t('disasterRelief'), desc: t('disasterReliefDesc'), color: '#faf5ff', accent: '#8b5cf6' },
+  ];
+  
   return (
     <div className="hp">
       {/* HERO */}
@@ -50,17 +53,17 @@ export default function Home() {
         </div>
         <div className="hp-hero-inner">
           <motion.div className="hp-badge" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.6 }}>
-            <span className="hp-badge-dot" /> Serving Tamil Nadu since 2026
+            <span className="hp-badge-dot" /> {t('servingTamilNadu')}
           </motion.div>
           <motion.div className="hp-logo-wrap" initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3, duration: 0.7, type: 'spring', stiffness: 100 }}>
             <div className="hp-logo-ring" />
             <img src={logo} alt="Sivam Trust" className="hp-logo" />
           </motion.div>
           <motion.h1 className="hp-hero-h1" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.7 }}>
-            Building Hope.<br /><span className="hp-grad">Creating Impact.</span>
+            {t('buildingHope')}.<br /><span className="hp-grad">{t('creatingImpact')}.</span>
           </motion.h1>
           <motion.p className="hp-hero-tag" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65 }}>
-            Helping the Poor • Serving with Love
+            {t('helpingPoor')} • {t('servingLove')}
           </motion.p>
           <motion.p className="hp-hero-sub" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}>
             அங்காள பரமேஸ்வரி துணை | ஆத்திஸ்வர சுவாமி துணை
@@ -68,12 +71,12 @@ export default function Home() {
           <motion.div className="hp-hero-btns" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.95 }}>
             <Link to="/donate">
               <motion.button className="hp-btn-blue" whileHover={{ scale: 1.05, boxShadow: '0 20px 40px rgba(37,99,235,0.45)' }} whileTap={{ scale: 0.97 }}>
-                Donate Now →
+                {t('donateNow')} →
               </motion.button>
             </Link>
             <Link to="/contact">
               <motion.button className="hp-btn-ghost" whileHover={{ scale: 1.05, background: 'rgba(255,255,255,0.15)' }} whileTap={{ scale: 0.97 }}>
-                Contact Us
+                {t('contactUs')}
               </motion.button>
             </Link>
           </motion.div>
@@ -103,9 +106,9 @@ export default function Home() {
         <div className="hp-container">
           <div className="hp-about-grid">
             <motion.div initial={{ opacity: 0, x: -50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
-              <span className="hp-label">About Us</span>
-              <h2 className="hp-h2">Serving Communities<br /><span className="hp-grad">With Heart & Purpose</span></h2>
-              <p className="hp-p">Sivam Trust Foundation is dedicated to helping the poor and needy people. We collect support through social media and provide food, basic needs, and essential help to those who need it most.</p>
+              <span className="hp-label">{t('about')}</span>
+              <h2 className="hp-h2">{t('ourMission')}<br /><span className="hp-grad">{t('transformingLives')}</span></h2>
+              <p className="hp-p">{t('missionDesc')}</p>
               <p className="hp-p">Founded by <strong>Sivaganesh J</strong>, our mission is to serve with love and compassion, ensuring no one goes without basic needs.</p>
               <div className="hp-tags">
                 <span className="hp-tag">🌱 Est. 2026</span>
@@ -114,15 +117,15 @@ export default function Home() {
               </div>
               <Link to="/donate">
                 <motion.button className="hp-btn-blue" style={{ marginTop: '2rem' }} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
-                  Support Our Mission →
+                  {t('donate')} →
                 </motion.button>
               </Link>
             </motion.div>
             <motion.div initial={{ opacity: 0, x: 50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
               <div className="hp-mission-cards">
                 {[
-                  { icon: '🎯', title: 'Our Mission', desc: 'To eliminate hunger and poverty through community-driven initiatives and compassionate action.' },
-                  { icon: '👁️', title: 'Our Vision', desc: 'A world where every individual has access to food, education and basic healthcare.' },
+                  { icon: '🎯', title: t('ourMission'), desc: 'To eliminate hunger and poverty through community-driven initiatives and compassionate action.' },
+                  { icon: '👁️', title: t('ourVision'), desc: t('visionDesc') },
                   { icon: '💎', title: 'Our Values', desc: 'Compassion, transparency, integrity and community first — always.' },
                 ].map((m, i) => (
                   <motion.div key={i} className="hp-mission-card" whileHover={{ x: 6, boxShadow: '0 8px 24px rgba(0,0,0,0.08)' }}>
@@ -141,7 +144,7 @@ export default function Home() {
         <div className="hp-container">
           <motion.div className="hp-center" initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <span className="hp-label">What We Do</span>
-            <h2 className="hp-h2">Making Impact <span className="hp-grad">Every Day</span></h2>
+            <h2 className="hp-h2">{t('makeImpact')} <span className="hp-grad">Every Day</span></h2>
             <p className="hp-p" style={{ maxWidth: 500, margin: '1rem auto 0' }}>From food distribution to education support — we are there for every need.</p>
           </motion.div>
           <div className="hp-feat-grid">
@@ -167,15 +170,15 @@ export default function Home() {
         </div>
         <div className="hp-container hp-center" style={{ position: 'relative', zIndex: 2 }}>
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <span className="hp-label" style={{ color: '#93c5fd' }}>Make a Difference</span>
-            <h2 className="hp-cta-h2">Join Us in Building<br />a Better Tomorrow</h2>
+            <span className="hp-label" style={{ color: '#93c5fd' }}>{t('makeADifference')}</span>
+            <h2 className="hp-cta-h2">{t('joinUs')} in Building<br />a Better Tomorrow</h2>
             <p className="hp-cta-sub">Your small contribution can change someone's life forever.</p>
             <div className="hp-hero-btns">
               <Link to="/donate">
-                <motion.button className="hp-btn-white" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>Donate Now →</motion.button>
+                <motion.button className="hp-btn-white" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>{t('donateNow')} →</motion.button>
               </Link>
               <Link to="/events">
-                <motion.button className="hp-btn-ghost" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>View Events</motion.button>
+                <motion.button className="hp-btn-ghost" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>View {t('events')}</motion.button>
               </Link>
             </div>
           </motion.div>

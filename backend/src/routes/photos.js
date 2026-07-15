@@ -29,7 +29,7 @@ const isValidImageBuffer = (buffer) => {
 };
 
 // Upload multiple photos
-router.post('/upload', protect, requireRole('founder', 'co-founder', 'media'), upload.array('photos', 10), async (req, res) => {
+router.post('/upload', protect, requireRole('founder', 'co-founder-1', 'co-founder-2', 'media'), upload.array('photos', 10), async (req, res) => {
   try {
     const { event_id, title, caption } = req.body
     const files = req.files
@@ -113,7 +113,7 @@ router.get('/:event_id', async (req, res) => {
 })
 
 // Delete a photo
-router.delete('/:id', protect, requireRole('founder', 'co-founder', 'media'), async (req, res) => {
+router.delete('/:id', protect, requireRole('founder', 'co-founder-1', 'co-founder-2', 'media'), async (req, res) => {
   const { id } = req.params
 
   const { data: photo } = await supabase

@@ -29,12 +29,29 @@
 
 .nav-inner {
   max-width: 1200px; margin: 0 auto;
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
   padding: 12px 24px; border-radius: 16px;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(8px);
   transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ===== BACK BUTTON ===== */
+.nav-back-wrapper {
+  flex-shrink: 0;
+}
+
+.nav-back-wrapper .back-button {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  color: #2563eb;
+}
+
+.nav-back-wrapper .back-button:hover {
+  background: rgba(255, 255, 255, 1);
+  border-color: #2563eb;
+  transform: translateX(-3px);
 }
 
 /* ===== BRAND ===== */
@@ -151,7 +168,10 @@
   .nav-links-desktop { display: none; }
   .nav-cta-btn { display: none; }
   .nav-hamburger { display: flex; }
-  .nav-inner { padding: 10px 16px; }
+  .nav-inner { padding: 10px 12px; flex-wrap: wrap; }
+  .nav-back-wrapper { order: -1; flex-basis: 100%; margin-bottom: 8px; }
+  .nav-back-wrapper .back-button { width: 100%; justify-content: center; }
+  .nav-brand { flex: 1; }
 }
 
 @media (min-width: 769px) {

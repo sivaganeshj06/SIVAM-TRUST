@@ -115,9 +115,16 @@
 .cfx-report-item h3 { font-size: 24px; font-weight: 800; color: #10b981; margin: 0; }
 
 @media (max-width: 768px) {
-  .cfx-sidebar { position: fixed; z-index: 100; height: 100vh; }
-  .cfx-sidebar.closed { width: 0; }
+  .cfx-root { position: relative; }
+  .cfx-sidebar { position: fixed; z-index: 100; height: 100vh; transform: translateX(-100%); transition: transform 0.3s ease; }
+  .cfx-sidebar.open { transform: translateX(0); box-shadow: 4px 0 20px rgba(0,0,0,0.2); }
+  .cfx-sidebar.closed { transform: translateX(-100%); }
+  .cfx-main { width: 100%; }
+  .cfx-mobile-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; display: none; }
+  .cfx-mobile-overlay.show { display: block; }
+  .cfx-mobile-menu-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: #f1f5f9; border: none; border-radius: 10px; cursor: pointer; color: #475569; }
   .cfx-charts-row { flex-direction: column; }
   .cfx-stats-grid { grid-template-columns: repeat(2, 1fr); }
   .cfx-content { padding: 1rem; }
+  .cfx-header { padding: 0.75rem 1rem; }
 }

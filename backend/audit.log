@@ -40,3 +40,56 @@
 [2026-07-03T08:26:43.747Z] [INFO] [AUTH_SUCCESS] - {"userId":"9289082d-b77a-44d7-9ad3-0b4fe04f9621","role":"co-founder-1","ip":"::1"}
 [2026-07-03T08:26:43.995Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"Could not find the table 'public.notifications' in the schema cache","userId":"9289082d-b77a-44d7-9ad3-0b4fe04f9621"}
 [2026-07-03T08:26:44.600Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"Could not find the table 'public.notifications' in the schema cache","userId":"987007be-d398-44a2-9e4e-489049d56264"}
+[2026-07-13T15:06:28.584Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
+[2026-07-13T15:07:15.034Z] [INFO] [DONATION_SUBMITTED] - {"donationId":"74272d55-09ed-44e6-934f-916c20250b4b","amount":"100"}
+[2026-07-13T15:07:17.282Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"987007be-d398-44a2-9e4e-489049d56264"}
+[2026-07-13T15:07:19.341Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"8102dde9-0f6a-4262-b099-c2d12c61f9d6"}
+[2026-07-13T15:07:19.346Z] [INFO] [EMAIL_LOGGED] - {"to":"notifications@sivamtrust.org","subject":"💰 New Donation Pending: ₹100"}
+[2026-07-13T15:08:00.056Z] [INFO] [AUTH_SUCCESS] - {"userId":"987007be-d398-44a2-9e4e-489049d56264","role":"founder","ip":"::1"}
+[2026-07-13T15:08:01.339Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"987007be-d398-44a2-9e4e-489049d56264"}
+[2026-07-13T15:10:00.589Z] [INFO] [EMAIL_LOGGED] - {"to":"founder@sivamtrust.org","subject":"⚠️ Login Alert: Santhosh S (co-founder-1)"}
+[2026-07-13T15:10:00.590Z] [INFO] [AUTH_SUCCESS] - {"userId":"9289082d-b77a-44d7-9ad3-0b4fe04f9621","role":"co-founder-1","ip":"::1"}
+[2026-07-13T15:10:02.444Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"9289082d-b77a-44d7-9ad3-0b4fe04f9621"}
+[2026-07-13T15:10:04.494Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"987007be-d398-44a2-9e4e-489049d56264"}
+[2026-07-13T15:11:33.312Z] [INFO] [EMAIL_LOGGED] - {"to":"founder@sivamtrust.org","subject":"⚠️ Login Alert: Agathiyan R (accountant)"}
+[2026-07-13T15:11:33.312Z] [INFO] [AUTH_SUCCESS] - {"userId":"8102dde9-0f6a-4262-b099-c2d12c61f9d6","role":"accountant","ip":"::1"}
+[2026-07-13T15:11:36.857Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"8102dde9-0f6a-4262-b099-c2d12c61f9d6"}
+[2026-07-13T15:11:38.985Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"987007be-d398-44a2-9e4e-489049d56264"}
+[2026-07-13T15:13:22.555Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
+[2026-07-13T15:13:30.055Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
+[2026-07-13T15:13:31.435Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
+[2026-07-13T15:13:39.400Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
+[2026-07-13T15:13:40.706Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
+[2026-07-13T15:14:02.407Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
+[2026-07-13T15:16:06.590Z] [INFO] [EMAIL_LOGGED] - {"to":"founder@sivamtrust.org","subject":"⚠️ Login Alert: Agathiyan R (accountant)"}
+[2026-07-13T15:16:06.592Z] [INFO] [AUTH_SUCCESS] - {"userId":"8102dde9-0f6a-4262-b099-c2d12c61f9d6","role":"accountant","ip":"::1"}
+[2026-07-13T15:16:07.155Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"8102dde9-0f6a-4262-b099-c2d12c61f9d6"}
+[2026-07-13T15:16:14.275Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"987007be-d398-44a2-9e4e-489049d56264"}
+[2026-07-13T15:17:38.805Z] [WARN] [AUTH_FAILED] - {"reason":"Password mismatch","reference_number":"STF/2026/VED/01","ip":"::1"}
+[2026-07-13T15:17:48.934Z] [INFO] [EMAIL_LOGGED] - {"to":"founder@sivamtrust.org","subject":"⚠️ Login Alert: Elavarasan E (media)"}
+[2026-07-13T15:17:48.935Z] [INFO] [AUTH_SUCCESS] - {"userId":"88e84f07-0ec4-49b4-8a41-af934952a22e","role":"media","ip":"::1"}
+[2026-07-13T15:17:50.721Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"88e84f07-0ec4-49b4-8a41-af934952a22e"}
+[2026-07-13T15:17:53.868Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"987007be-d398-44a2-9e4e-489049d56264"}
+[2026-07-13T15:32:55.927Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
+[2026-07-13T15:32:56.036Z] [WARN] [AUTH_BLOCKED] - {"reason":"Invalid or expired token","error":"jwt expired","ip":"::1"}
+[2026-07-13T16:32:50.060Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
+[2026-07-13T16:34:26.644Z] [INFO] [AUTH_SUCCESS] - {"userId":"987007be-d398-44a2-9e4e-489049d56264","role":"founder","ip":"::1"}
+[2026-07-13T16:34:27.252Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"987007be-d398-44a2-9e4e-489049d56264"}
+[2026-07-13T16:52:18.591Z] [WARN] [AUTH_BLOCKED] - {"reason":"Invalid or expired token","error":"jwt expired","ip":"::1"}
+[2026-07-13T17:11:31.139Z] [INFO] [EMAIL_LOGGED] - {"to":"founder@sivamtrust.org","subject":"⚠️ Login Alert: Santhosh S (co-founder-1)"}
+[2026-07-13T17:11:31.141Z] [INFO] [AUTH_SUCCESS] - {"userId":"9289082d-b77a-44d7-9ad3-0b4fe04f9621","role":"co-founder-1","ip":"::1"}
+[2026-07-13T17:11:31.484Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"9289082d-b77a-44d7-9ad3-0b4fe04f9621"}
+[2026-07-13T17:11:32.100Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"987007be-d398-44a2-9e4e-489049d56264"}
+[2026-07-13T17:17:13.698Z] [INFO] [AUTH_SUCCESS] - {"userId":"987007be-d398-44a2-9e4e-489049d56264","role":"founder","ip":"::1"}
+[2026-07-13T17:17:15.001Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"987007be-d398-44a2-9e4e-489049d56264"}
+[2026-07-15T10:16:29.351Z] [INFO] [SERVER_STARTED] - {"port":"5000"}
+[2026-07-15T10:17:00.443Z] [INFO] [AUTH_SUCCESS] - {"userId":"987007be-d398-44a2-9e4e-489049d56264","role":"founder","ip":"::1"}
+[2026-07-15T10:17:01.373Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"987007be-d398-44a2-9e4e-489049d56264"}
+[2026-07-15T10:17:28.286Z] [INFO] [DONATION_SUBMITTED] - {"donationId":"e8d637ca-9de8-4808-b53d-919a030317f9","amount":"100"}
+[2026-07-15T10:17:29.098Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"987007be-d398-44a2-9e4e-489049d56264"}
+[2026-07-15T10:17:29.899Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"8102dde9-0f6a-4262-b099-c2d12c61f9d6"}
+[2026-07-15T10:17:29.902Z] [INFO] [EMAIL_LOGGED] - {"to":"notifications@sivamtrust.org","subject":"💰 New Donation Pending: ₹100"}
+[2026-07-15T10:17:49.437Z] [INFO] [EMAIL_LOGGED] - {"to":"founder@sivamtrust.org","subject":"⚠️ Login Alert: Santhosh S (co-founder-1)"}
+[2026-07-15T10:17:49.439Z] [INFO] [AUTH_SUCCESS] - {"userId":"9289082d-b77a-44d7-9ad3-0b4fe04f9621","role":"co-founder-1","ip":"::1"}
+[2026-07-15T10:17:49.693Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"9289082d-b77a-44d7-9ad3-0b4fe04f9621"}
+[2026-07-15T10:17:50.311Z] [ERROR] [NOTIFICATION_DB_ERROR] - {"error":"new row violates row-level security policy for table \"notifications\"","userId":"987007be-d398-44a2-9e4e-489049d56264"}

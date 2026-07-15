@@ -3,22 +3,24 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import './Donate.css';
 import { API } from '../utils/api';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const presetAmounts = [100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000];
 
-const impacts = [
-  { icon: '🍚', amount: '₹100', desc: 'Feeds a family for a day' },
-  { icon: '📚', amount: '₹500', desc: 'School supplies for a child' },
-  { icon: '🏥', amount: '₹1000', desc: 'Medical aid for one person' },
-  { icon: '🏠', amount: '₹2500', desc: 'Basic needs for a week' },
-];
-
 export default function Donate() {
+  const { t } = useLanguage();
   const [form, setForm] = useState({ donor_name: '', email: '', phone: '', amount: '' });
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedAmount, setSelectedAmount] = useState(null);
+
+  const impacts = [
+    { icon: '🍚', amount: '₹100', desc: t('feedsFamily') },
+    { icon: '📚', amount: '₹500', desc: t('schoolSupplies') },
+    { icon: '🏥', amount: '₹1000', desc: t('medicalAid') },
+    { icon: '🏠', amount: '₹2500', desc: t('basicNeeds') },
+  ];
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -50,9 +52,9 @@ export default function Donate() {
           <div className="dn-orb-1" /><div className="dn-orb-2" />
         </div>
         <motion.div className="dn-hero-inner" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-          <span className="dn-label">Make a Difference</span>
-          <h1 className="dn-hero-h1">Your Generosity<br /><span className="dn-grad">Changes Lives</span></h1>
-          <p className="dn-hero-sub">Every rupee you donate directly helps the poor and needy in Tamil Nadu.</p>
+          <span className="dn-label">{t('makeADifference')}</span>
+          <h1 className="dn-hero-h1">{t('yourGenerosity')}<br /><span className="dn-grad">{t('changesLives')}</span></h1>
+          <p className="dn-hero-sub">{t('everyRupee')}</p>
         </motion.div>
       </section>
 
@@ -79,15 +81,15 @@ export default function Donate() {
         <div className="dn-container dn-grid">
           {/* LEFT INFO */}
           <motion.div className="dn-info" initial={{ opacity: 0, x: -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
-            <span className="dn-label">Why Donate?</span>
-            <h2 className="dn-h2">Every Contribution<br /><span className="dn-grad">Matters</span></h2>
+            <span className="dn-label">{t('whyDonate')}</span>
+            <h2 className="dn-h2">{t('everyContribution')}<br /><span className="dn-grad">{t('matters')}</span></h2>
             <div className="dn-reasons">
               {[
-                { icon: '🍚', text: 'Provide food to hungry families' },
-                { icon: '📚', text: 'Support education for children' },
-                { icon: '🏥', text: 'Help with medical needs' },
-                { icon: '🏠', text: 'Basic needs for the homeless' },
-                { icon: '🌱', text: 'Community development programs' },
+                { icon: '🍚', text: t('provideFood') },
+                { icon: '📚', text: t('supportEducation') },
+                { icon: '🏥', text: t('helpMedical') },
+                { icon: '🏠', text: t('basicNeeds') },
+                { icon: '🌱', text: t('communityDev') },
               ].map((r, i) => (
                 <motion.div key={i} className="dn-reason" initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}>
                   <span>{r.icon}</span><p>{r.text}</p>
@@ -98,17 +100,17 @@ export default function Donate() {
             <div className="dn-bank-card">
               <div className="dn-bank-header">
                 <span className="dn-bank-icon">🏦</span>
-                <h3>Bank Transfer Details</h3>
+                <h3>{t('bankTransfer')}</h3>
               </div>
-              <div className="dn-bank-row"><span>Account Name</span><strong>Sivam Trust Foundation</strong></div>
-              <div className="dn-bank-row"><span>Phone</span><strong>79045 71160 | 96005 05873</strong></div>
-              <div className="dn-bank-row"><span>Founder</span><strong>Sivaganesh J</strong></div>
+              <div className="dn-bank-row"><span>{t('accountName')}</span><strong>Sivam Trust Foundation</strong></div>
+              <div className="dn-bank-row"><span>{t('phone')}</span><strong>79045 71160 | 96005 05873</strong></div>
+              <div className="dn-bank-row"><span>{t('founder')}</span><strong>Sivaganesh J</strong></div>
             </div>
 
             <div className="dn-security">
-              <span className="dn-sec-badge">🔒 100% Secure</span>
-              <span className="dn-sec-badge">✅ Verified NGO</span>
-              <span className="dn-sec-badge">💙 Transparent</span>
+              <span className="dn-sec-badge">🔒 {t('secure')}</span>
+              <span className="dn-sec-badge">✅ {t('verified')}</span>
+              <span className="dn-sec-badge">💙 {t('transparent')}</span>
             </div>
           </motion.div>
 
@@ -118,19 +120,19 @@ export default function Donate() {
               {success ? (
                 <motion.div key="success" className="dn-success" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
                   <div className="dn-success-icon">🎉</div>
-                  <h3>Thank You!</h3>
-                  <p>Your generous donation has been received. You are making a real difference in someone's life🫶.</p>
+                  <h3>{t('thankYou')}</h3>
+                  <p>{t('donationReceived')}</p>
                   <p className="dn-success-quote">"Thank you for your generous contribution. Your donation has been successfully received. Your support helps us continue our mission."</p>
-                  <motion.button className="dn-btn-blue" onClick={() => setSuccess(false)} whileHover={{ scale: 1.05 }}>Donate Again</motion.button>
+                  <motion.button className="dn-btn-blue" onClick={() => setSuccess(false)} whileHover={{ scale: 1.05 }}>{t('donateAgain')}</motion.button>
                 </motion.div>
               ) : (
                 <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <h2 className="dn-form-title">Donor Details</h2>
+                  <h2 className="dn-form-title">{t('donorDetails')}</h2>
                   <p className="dn-form-sub">Fill in your details to complete the donation</p>
 
                   {/* Preset amounts */}
                   <div className="dn-presets">
-                    <p className="dn-preset-label">Select Amount</p>
+                    <p className="dn-preset-label">{t('selectAmount')}</p>
                     <div className="dn-preset-grid">
                       {presetAmounts.map(amt => (
                         <motion.button key={amt} type="button"
@@ -151,20 +153,20 @@ export default function Donate() {
 
                   <form onSubmit={handleSubmit} className="dn-form">
                     <div className="dn-field">
-                      <label>Full Name *</label>
-                      <input type="text" name="donor_name" placeholder="yourname" value={form.donor_name} onChange={handleChange} required />
+                      <label>{t('name')} *</label>
+                      <input type="text" name="donor_name" placeholder={t('name')} value={form.donor_name} onChange={handleChange} required />
                     </div>
                     <div className="dn-field">
-                      <label>Email Address *</label>
-                      <input type="email" name="email" placeholder="you@example.com" value={form.email} onChange={handleChange} required />
+                      <label>{t('email')} *</label>
+                      <input type="email" name="email" placeholder={t('email')} value={form.email} onChange={handleChange} required />
                     </div>
                     <div className="dn-field">
-                      <label>Phone Number</label>
-                      <input type="tel" name="phone" placeholder="your phone no" value={form.phone} onChange={handleChange} />
+                      <label>{t('phone')}</label>
+                      <input type="tel" name="phone" placeholder={t('phone')} value={form.phone} onChange={handleChange} />
                     </div>
                     <div className="dn-field">
-                      <label>Donation Amount (₹) *</label>
-                      <input type="number" name="amount" placeholder="Enter amount" value={form.amount} onChange={e => { handleChange(e); setSelectedAmount(null); }} required />
+                      <label>{t('amount')} (₹) *</label>
+                      <input type="number" name="amount" placeholder={t('enterAmount')} value={form.amount} onChange={e => { handleChange(e); setSelectedAmount(null); }} required />
                     </div>
                     <motion.button type="submit" className="dn-btn-blue dn-submit" disabled={loading}
                       whileHover={{ scale: 1.02, boxShadow: '0 16px 40px rgba(37,99,235,0.4)' }}
@@ -172,7 +174,7 @@ export default function Donate() {
                       {loading ? (
                         <span className="dn-loading"><span className="dn-spinner" /> Processing...</span>
                       ) : (
-                        '❤️ Submit Donation'
+                        `❤️ ${t('submitDonation')}`
                       )}
                     </motion.button>
                   </form>

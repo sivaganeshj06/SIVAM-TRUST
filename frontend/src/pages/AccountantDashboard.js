@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
@@ -7,6 +7,7 @@ import { DollarSign, TrendingUp, Bell, LogOut, Home, ChevronRight, CheckCircle, 
 import './AccountantDashboard.css';
 import { API } from '../utils/api';
 import LoadingScreen from '../components/LoadingScreen';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function Counter({ target, prefix = '' }) {
   const [count, setCount] = useState(0);
@@ -23,6 +24,7 @@ function Counter({ target, prefix = '' }) {
 
 export default function AccountantDashboard() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
@@ -64,7 +66,16 @@ export default function AccountantDashboard() {
   };
 
   useEffect(() => {
-    if (!token || trustUser?.role !== 'accountant') { navigate('/access-denied'); return; }
+    if (!token || !trustUser?.role) {
+      navigate('/admin/login', { replace: true });
+      return;
+    }
+    
+    if (trustUser.role !== 'accountant') {
+      navigate('/access-denied', { replace: true });
+      return;
+    }
+    
     fetchAll();
     fetchNotifications();
 
@@ -82,6 +93,11 @@ export default function AccountantDashboard() {
       }
     };
 
+    eventSource.onerror = (error) => {
+      console.error('SSE connection error:', error);
+      eventSource.close();
+    };
+
     return () => {
       eventSource.close();
     };
@@ -89,15 +105,28 @@ export default function AccountantDashboard() {
   }, []);
 
   const fetchAll = async () => {
-    try { const res = await axios.get(`${API}/api/donations`, { headers }); setDonations(res.data || []); }
-    catch (err) { 
-      if (err.response?.status === 401) navigate('/admin/login'); 
-      else if (err.response?.status === 403) navigate('/access-denied');
+    try { 
+      const res = await axios.get(`${API}/api/donations`, { headers }); 
+      setDonations(res.data || []); 
+    } catch (err) { 
+      console.error('Error fetching donations:', err);
+      if (err.response?.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('trust_user');
+        navigate('/admin/login', { replace: true });
+      } else if (err.response?.status === 403) {
+        navigate('/access-denied', { replace: true });
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  const handleLogout = () => { localStorage.removeItem('token'); localStorage.removeItem('trust_user'); navigate('/admin/login'); };
+  const handleLogout = () => { 
+    localStorage.removeItem('token'); 
+    localStorage.removeItem('trust_user'); 
+    setTimeout(() => navigate('/admin/login', { replace: true }), 200);
+  };
 
   const totalAmount = donations.reduce((sum, d) => sum + Number(d.amount || 0), 0);
   const pendingAmount = donations.filter(d => d.payment_status === 'pending').reduce((sum, d) => sum + Number(d.amount || 0), 0);
@@ -107,22 +136,22 @@ export default function AccountantDashboard() {
   const today = new Date().toDateString();
   const todayDonations = donations.filter(d => new Date(d.created_at).toDateString() === today);
   const todayAmount = todayDonations.reduce((sum, d) => sum + Number(d.amount || 0), 0);
-  const monthlyData = donations.reduce((acc, d) => {
+  const monthlyData = donations.length > 0 ? donations.reduce((acc, d) => {
     const month = new Date(d.created_at).toLocaleString('en-IN', { month: 'short' });
     const existing = acc.find(a => a.month === month);
-    if (existing) existing.amount += Number(d.amount); else acc.push({ month, amount: Number(d.amount) });
+    if (existing) existing.amount += Number(d.amount || 0); else acc.push({ month, amount: Number(d.amount || 0) });
     return acc;
-  }, []);
+  }, []) : [];
   const statusData = [{ name: 'Pending', value: pendingCount, color: '#f59e0b' }, { name: 'Completed', value: completedCount, color: '#10b981' }];
   const filteredDonations = filterStatus === 'all' ? donations : donations.filter(d => (d.payment_status || 'pending') === filterStatus);
 
-  const navItems = [
-    { id: 'overview', label: 'Overview', icon: Home },
-    { id: 'donations', label: 'Donations', icon: DollarSign },
+  const navItems = useMemo(() => [
+    { id: 'overview', label: t('overview'), icon: Home },
+    { id: 'donations', label: t('donations'), icon: DollarSign },
     { id: 'payments', label: 'Payment History', icon: CreditCard },
-    { id: 'reports', label: 'Financial Reports', icon: FileText },
-    { id: 'analytics', label: 'Analytics', icon: TrendingUp },
-  ];
+    { id: 'reports', label: t('reports'), icon: FileText },
+    { id: 'analytics', label: t('analytics'), icon: TrendingUp },
+  ], [t]);
 
   if (loading) return <LoadingScreen fullPage={true} />;
 
@@ -133,7 +162,7 @@ export default function AccountantDashboard() {
           <div className="acx-logo">ST</div>{sidebarOpen && <span className="acx-logo-text">Sivam Trust</span>}
           <button className="acx-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>{sidebarOpen ? <X size={18} /> : <Menu size={18} />}</button>
         </div>
-        {sidebarOpen && (<div className="acx-user-info"><div className="acx-user-avatar">{trustUser?.name?.charAt(0)}</div><div><p className="acx-user-name">{trustUser?.name}</p><p className="acx-user-role">Accountant</p></div></div>)}
+        {sidebarOpen && (<div className="acx-user-info"><div className="acx-user-avatar">{trustUser?.name?.charAt(0)}</div><div><p className="acx-user-name">{trustUser?.name}</p><p className="acx-user-role">{t('accountant')}</p></div></div>)}
         <nav className="acx-nav">
           {navItems.map((item, i) => (
             <motion.button key={item.id} className={`acx-nav-item ${activeTab === item.id ? 'active' : ''}`} onClick={() => setActiveTab(item.id)}
@@ -144,13 +173,13 @@ export default function AccountantDashboard() {
         </nav>
         <div className="acx-sidebar-footer">
           <button className="acx-nav-item" onClick={() => setDarkMode(!darkMode)}>{darkMode ? <Sun size={20} /> : <Moon size={20} />}{sidebarOpen && <span>{darkMode ? 'Light' : 'Dark'} Mode</span>}</button>
-          <button className="acx-nav-item logout" onClick={handleLogout}><LogOut size={20} />{sidebarOpen && <span>Logout</span>}</button>
+          <button className="acx-nav-item logout" onClick={handleLogout}><LogOut size={20} />{sidebarOpen && <span>{t('logout')}</span>}</button>
         </div>
       </motion.aside>
 
       <main className="acx-main">
         <motion.header className="acx-header" initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-          <div><h1 className="acx-page-title">{navItems.find(n => n.id === activeTab)?.label}</h1><p className="acx-breadcrumb">Accountant <ChevronRight size={14} /> {navItems.find(n => n.id === activeTab)?.label}</p></div>
+          <div><h1 className="acx-page-title">{navItems.find(n => n.id === activeTab)?.label}</h1><p className="acx-breadcrumb">{t('accountant')} <ChevronRight size={14} /> {navItems.find(n => n.id === activeTab)?.label}</p></div>
           <div className="acx-header-right" style={{ position: 'relative' }}>
             <div 
               className="acx-notif-btn"
@@ -255,7 +284,7 @@ export default function AccountantDashboard() {
               )}
             </AnimatePresence>
 
-            <span className="acx-role-badge">Accountant</span>
+            <span className="acx-role-badge">{t('accountant')}</span>
           </div>
         </motion.header>
 
@@ -265,10 +294,10 @@ export default function AccountantDashboard() {
               <motion.div key="overview" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                 <div className="acx-stats-grid">
                   {[
-                    { icon: DollarSign, label: 'Total Collections', value: totalAmount, prefix: '₹', color: 'blue', sub: `${donations.length} donations` },
-                    { icon: CheckCircle, label: 'Completed', value: completedAmount, prefix: '₹', color: 'green', sub: `${completedCount} payments` },
-                    { icon: Clock, label: 'Pending', value: pendingAmount, prefix: '₹', color: 'amber', sub: `${pendingCount} pending` },
-                    { icon: TrendingUp, label: "Today's Income", value: todayAmount, prefix: '₹', color: 'purple', sub: `${todayDonations.length} today` },
+                    { icon: DollarSign, label: t('totalCollections'), value: totalAmount, prefix: '₹', color: 'blue', sub: `${donations.length} ${t('donations')}` },
+                    { icon: CheckCircle, label: t('completed'), value: completedAmount, prefix: '₹', color: 'green', sub: `${completedCount} payments` },
+                    { icon: Clock, label: t('pending'), value: pendingAmount, prefix: '₹', color: 'amber', sub: `${pendingCount} ${t('pending')}` },
+                    { icon: TrendingUp, label: t('todayIncome'), value: todayAmount, prefix: '₹', color: 'purple', sub: `${todayDonations.length} today` },
                   ].map((kpi, i) => (
                     <motion.div key={i} className={`acx-stat-card ${kpi.color}`} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} whileHover={{ y: -6 }}>
                       <div className="acx-stat-icon"><kpi.icon size={22} /></div>

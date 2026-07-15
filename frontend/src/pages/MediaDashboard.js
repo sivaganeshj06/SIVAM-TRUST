@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -6,9 +6,11 @@ import { Camera, Upload, Image, Bell, LogOut, Home, ChevronRight, Menu, X, Sun, 
 import './MediaDashboard.css';
 import { API } from '../utils/api';
 import LoadingScreen from '../components/LoadingScreen';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function MediaDashboard() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
@@ -58,7 +60,16 @@ export default function MediaDashboard() {
   };
 
   useEffect(() => {
-    if (!token || trustUser?.role !== 'media') { navigate('/access-denied'); return; }
+    if (!token || !trustUser?.role) {
+      navigate('/admin/login', { replace: true });
+      return;
+    }
+    
+    if (trustUser.role !== 'media') {
+      navigate('/access-denied', { replace: true });
+      return;
+    }
+    
     fetchAll();
     fetchNotifications();
 
@@ -76,6 +87,11 @@ export default function MediaDashboard() {
       }
     };
 
+    eventSource.onerror = (error) => {
+      console.error('SSE connection error:', error);
+      eventSource.close();
+    };
+
     return () => {
       eventSource.close();
     };
@@ -88,21 +104,37 @@ export default function MediaDashboard() {
       setEvents(res.data || []);
       const photosArr = [];
       for (const evt of res.data || []) {
-        try { const photoRes = await axios.get(`${API}/api/photos/${evt.id}`); photosArr.push(...(photoRes.data || []).map(p => ({ ...p, event_title: evt.title }))); } catch {}
+        try { 
+          const photoRes = await axios.get(`${API}/api/photos/${evt.id}`); 
+          photosArr.push(...(photoRes.data || []).map(p => ({ ...p, event_title: evt.title }))); 
+        } catch (photoErr) {
+          console.error('Error fetching photos for event:', evt.id, photoErr);
+        }
       }
       setAllPhotos(photosArr);
     } catch (err) { 
-      if (err.response?.status === 401) navigate('/admin/login'); 
-      else if (err.response?.status === 403) navigate('/access-denied');
+      console.error('Error fetching events:', err);
+      if (err.response?.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('trust_user');
+        navigate('/admin/login', { replace: true });
+      } else if (err.response?.status === 403) {
+        navigate('/access-denied', { replace: true });
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const fetchEventPhotos = async (eventId) => {
     try { const res = await axios.get(`${API}/api/photos/${eventId}`); setEventPhotos(res.data || []); } catch { setEventPhotos([]); }
   };
 
-  const handleLogout = () => { localStorage.removeItem('token'); localStorage.removeItem('trust_user'); navigate('/admin/login'); };
+  const handleLogout = () => { 
+    localStorage.removeItem('token'); 
+    localStorage.removeItem('trust_user'); 
+    setTimeout(() => navigate('/admin/login', { replace: true }), 200);
+  };
 
   const handlePhotoUpload = async (e) => {
     e.preventDefault();
@@ -135,11 +167,11 @@ export default function MediaDashboard() {
     setPhotoFiles(files);
   };
 
-  const navItems = [
-    { id: 'overview', label: 'Overview', icon: Home },
-    { id: 'upload', label: 'Upload Photos', icon: Upload },
-    { id: 'gallery', label: 'Photo Gallery', icon: Image },
-  ];
+  const navItems = useMemo(() => [
+    { id: 'overview', label: t('overview'), icon: Home },
+    { id: 'upload', label: t('uploadPhotos'), icon: Upload },
+    { id: 'gallery', label: t('gallery'), icon: Image },
+  ], [t]);
 
   if (loading) return <LoadingScreen fullPage={true} />;
 
@@ -150,7 +182,7 @@ export default function MediaDashboard() {
           <div className="mdx-logo">ST</div>{sidebarOpen && <span className="mdx-logo-text">Sivam Trust</span>}
           <button className="mdx-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>{sidebarOpen ? <X size={18} /> : <Menu size={18} />}</button>
         </div>
-        {sidebarOpen && (<div className="mdx-user-info"><div className="mdx-user-avatar">{trustUser?.name?.charAt(0)}</div><div><p className="mdx-user-name">{trustUser?.name}</p><p className="mdx-user-role">Media</p></div></div>)}
+        {sidebarOpen && (<div className="mdx-user-info"><div className="mdx-user-avatar">{trustUser?.name?.charAt(0)}</div><div><p className="mdx-user-name">{trustUser?.name}</p><p className="mdx-user-role">{t('media')}</p></div></div>)}
         <nav className="mdx-nav">
           {navItems.map((item, i) => (
             <motion.button key={item.id} className={`mdx-nav-item ${activeTab === item.id ? 'active' : ''}`} onClick={() => setActiveTab(item.id)}
@@ -161,13 +193,13 @@ export default function MediaDashboard() {
         </nav>
         <div className="mdx-sidebar-footer">
           <button className="mdx-nav-item" onClick={() => setDarkMode(!darkMode)}>{darkMode ? <Sun size={20} /> : <Moon size={20} />}{sidebarOpen && <span>{darkMode ? 'Light' : 'Dark'} Mode</span>}</button>
-          <button className="mdx-nav-item logout" onClick={handleLogout}><LogOut size={20} />{sidebarOpen && <span>Logout</span>}</button>
+          <button className="mdx-nav-item logout" onClick={handleLogout}><LogOut size={20} />{sidebarOpen && <span>{t('logout')}</span>}</button>
         </div>
       </motion.aside>
 
       <main className="mdx-main">
         <motion.header className="mdx-header" initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-          <div><h1 className="mdx-page-title">{navItems.find(n => n.id === activeTab)?.label}</h1><p className="mdx-breadcrumb">Media <ChevronRight size={14} /> {navItems.find(n => n.id === activeTab)?.label}</p></div>
+          <div><h1 className="mdx-page-title">{navItems.find(n => n.id === activeTab)?.label}</h1><p className="mdx-breadcrumb">{t('media')} <ChevronRight size={14} /> {navItems.find(n => n.id === activeTab)?.label}</p></div>
           <div className="mdx-header-right" style={{ position: 'relative' }}>
             <div 
               className="mdx-notif-btn"
@@ -272,7 +304,7 @@ export default function MediaDashboard() {
               )}
             </AnimatePresence>
 
-            <span className="mdx-role-badge">Media</span>
+            <span className="mdx-role-badge">{t('media')}</span>
           </div>
         </motion.header>
 
@@ -282,10 +314,10 @@ export default function MediaDashboard() {
               <motion.div key="overview" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                 <div className="mdx-stats-grid">
                   {[
-                    { icon: Camera, label: 'Total Photos', value: allPhotos.length, color: 'purple', sub: 'All events' },
-                    { icon: Image, label: 'Total Events', value: events.length, color: 'blue', sub: 'With photos' },
-                    { icon: CheckCircle, label: 'Completed Events', value: events.filter(e => e.status === 'completed').length, color: 'green', sub: 'Done' },
-                    { icon: Clock, label: 'Upcoming Events', value: events.filter(e => e.status === 'upcoming').length, color: 'amber', sub: 'Coming soon' },
+                    { icon: Camera, label: t('allPhotos'), value: allPhotos.length, color: 'purple', sub: 'All events' },
+                    { icon: Image, label: t('allEvents'), value: events.length, color: 'blue', sub: 'With photos' },
+                    { icon: CheckCircle, label: t('completedEvents'), value: events.filter(e => e.status === 'completed').length, color: 'green', sub: 'Done' },
+                    { icon: Clock, label: t('upcomingEvents'), value: events.filter(e => e.status === 'upcoming').length, color: 'amber', sub: 'Coming soon' },
                   ].map((kpi, i) => (
                     <motion.div key={i} className={`mdx-stat-card ${kpi.color}`} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} whileHover={{ y: -6 }}>
                       <div className="mdx-stat-icon"><kpi.icon size={22} /></div>

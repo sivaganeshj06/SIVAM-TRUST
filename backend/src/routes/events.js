@@ -66,7 +66,7 @@ router.get('/', async (req, res) => {
 })
 
 // Create event (Founder + Co-Founder only)
-router.post('/', protect, requireRole('founder', 'co-founder'), eventValidation, async (req, res) => {
+router.post('/', protect, requireRole('founder', 'co-founder-1', 'co-founder-2'), eventValidation, async (req, res) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res.status(400).json({ error: errors.array()[0].msg })
@@ -106,7 +106,7 @@ router.post('/', protect, requireRole('founder', 'co-founder'), eventValidation,
 })
 
 // Update event (Founder + Co-Founder only)
-router.put('/:id', protect, requireRole('founder', 'co-founder'), validateEventId, eventUpdateValidation, async (req, res) => {
+router.put('/:id', protect, requireRole('founder', 'co-founder-1', 'co-founder-2'), validateEventId, eventUpdateValidation, async (req, res) => {
   const errors = validationResult(req)
   if (!errors.isEmpty()) {
     return res.status(400).json({ error: errors.array()[0].msg })

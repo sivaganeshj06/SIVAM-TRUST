@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
@@ -7,6 +7,7 @@ import { Calendar, Heart, TrendingUp, Bell, LogOut, Home, ChevronRight, CheckCir
 import './CoFounderDashboard.css';
 import { API } from '../utils/api';
 import LoadingScreen from '../components/LoadingScreen';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function Counter({ target, prefix = '' }) {
   const [count, setCount] = useState(0);
@@ -23,6 +24,7 @@ function Counter({ target, prefix = '' }) {
 
 export default function CoFounderDashboard() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
@@ -65,7 +67,16 @@ export default function CoFounderDashboard() {
   };
 
   useEffect(() => {
-    if (!token || !['co-founder-1', 'co-founder-2'].includes(trustUser?.role)) { navigate('/access-denied'); return; }
+    if (!token || !trustUser?.role) {
+      navigate('/admin/login', { replace: true });
+      return;
+    }
+    
+    if (!['co-founder-1', 'co-founder-2'].includes(trustUser.role)) {
+      navigate('/access-denied', { replace: true });
+      return;
+    }
+    
     fetchAll();
     fetchNotifications();
 
@@ -83,6 +94,11 @@ export default function CoFounderDashboard() {
       }
     };
 
+    eventSource.onerror = (error) => {
+      console.error('SSE connection error:', error);
+      eventSource.close();
+    };
+
     return () => {
       eventSource.close();
     };
@@ -94,13 +110,24 @@ export default function CoFounderDashboard() {
       const [don, evt] = await Promise.all([axios.get(`${API}/api/donations`, { headers }), axios.get(`${API}/api/events`, { headers })]);
       setDonations(don.data || []); setEvents(evt.data || []);
     } catch (err) { 
-      if (err.response?.status === 401) navigate('/admin/login'); 
-      else if (err.response?.status === 403) navigate('/access-denied');
+      console.error('Error fetching data:', err);
+      if (err.response?.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('trust_user');
+        navigate('/admin/login', { replace: true });
+      } else if (err.response?.status === 403) {
+        navigate('/access-denied', { replace: true });
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  const handleLogout = () => { localStorage.removeItem('token'); localStorage.removeItem('trust_user'); navigate('/admin/login'); };
+  const handleLogout = () => { 
+    localStorage.removeItem('token'); 
+    localStorage.removeItem('trust_user'); 
+    setTimeout(() => navigate('/admin/login', { replace: true }), 200);
+  };
 
   const handleAddEvent = async (e) => {
     e.preventDefault();
@@ -117,15 +144,15 @@ export default function CoFounderDashboard() {
   const upcomingEvents = events.filter(e => e.status === 'upcoming').length;
   const completedEvents = events.filter(e => e.status === 'completed').length;
   const pendingDonations = donations.filter(d => d.payment_status === 'pending').length;
-  const donationChartData = donations.slice(0, 6).map((d, i) => ({ name: `#${i + 1}`, amount: Number(d.amount) })).reverse();
+  const donationChartData = donations.length > 0 ? donations.slice(0, 6).map((d, i) => ({ name: `#${i + 1}`, amount: Number(d.amount || 0) })).reverse() : [];
 
-  const navItems = [
-    { id: 'overview', label: 'Overview', icon: Home },
-    { id: 'events', label: 'Events', icon: Calendar },
-    { id: 'donations', label: 'Donations', icon: Heart },
-    { id: 'analytics', label: 'Analytics', icon: TrendingUp },
-    { id: 'reports', label: 'Reports', icon: FileText },
-  ];
+  const navItems = useMemo(() => [
+    { id: 'overview', label: t('overview'), icon: Home },
+    { id: 'events', label: t('events'), icon: Calendar },
+    { id: 'donations', label: t('donations'), icon: Heart },
+    { id: 'analytics', label: t('analytics'), icon: TrendingUp },
+    { id: 'reports', label: t('reports'), icon: FileText },
+  ], [t]);
 
   if (loading) return <LoadingScreen fullPage={true} />;
 
@@ -140,7 +167,7 @@ export default function CoFounderDashboard() {
         {sidebarOpen && (
           <div className="cfx-user-info">
             <div className="cfx-user-avatar">{trustUser?.name?.charAt(0)}</div>
-            <div><p className="cfx-user-name">{trustUser?.name}</p><p className="cfx-user-role">Co-Founder</p></div>
+            <div><p className="cfx-user-name">{trustUser?.name}</p><p className="cfx-user-role">{t('coFounder')}</p></div>
           </div>
         )}
         <nav className="cfx-nav">
@@ -153,13 +180,13 @@ export default function CoFounderDashboard() {
         </nav>
         <div className="cfx-sidebar-footer">
           <button className="cfx-nav-item" onClick={() => setDarkMode(!darkMode)}>{darkMode ? <Sun size={20} /> : <Moon size={20} />}{sidebarOpen && <span>{darkMode ? 'Light' : 'Dark'} Mode</span>}</button>
-          <button className="cfx-nav-item logout" onClick={handleLogout}><LogOut size={20} />{sidebarOpen && <span>Logout</span>}</button>
+          <button className="cfx-nav-item logout" onClick={handleLogout}><LogOut size={20} />{sidebarOpen && <span>{t('logout')}</span>}</button>
         </div>
       </motion.aside>
 
       <main className="cfx-main">
         <motion.header className="cfx-header" initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-          <div><h1 className="cfx-page-title">{navItems.find(n => n.id === activeTab)?.label}</h1><p className="cfx-breadcrumb">Co-Founder <ChevronRight size={14} /> {navItems.find(n => n.id === activeTab)?.label}</p></div>
+          <div><h1 className="cfx-page-title">{navItems.find(n => n.id === activeTab)?.label}</h1><p className="cfx-breadcrumb">{t('coFounder')} <ChevronRight size={14} /> {navItems.find(n => n.id === activeTab)?.label}</p></div>
           <div className="cfx-header-right" style={{ position: 'relative' }}>
             <div 
               className="cfx-notif-btn"
@@ -264,7 +291,7 @@ export default function CoFounderDashboard() {
               )}
             </AnimatePresence>
 
-            <span className="cfx-role-badge">Co-Founder</span>
+            <span className="cfx-role-badge">{t('coFounder')}</span>
           </div>
         </motion.header>
 
@@ -274,10 +301,10 @@ export default function CoFounderDashboard() {
               <motion.div key="overview" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                 <div className="cfx-stats-grid">
                   {[
-                    { icon: Heart, label: 'Total Donations', value: totalDonations, prefix: '₹', color: 'emerald', sub: `${donations.length} donors` },
-                    { icon: Calendar, label: 'Upcoming Events', value: upcomingEvents, color: 'blue', sub: `${completedEvents} completed` },
-                    { icon: Clock, label: 'Pending Donations', value: pendingDonations, color: 'amber', sub: 'Awaiting payment' },
-                    { icon: CheckCircle, label: 'Total Events', value: events.length, color: 'violet', sub: 'All time' },
+                    { icon: Heart, label: t('totalDonations'), value: totalDonations, prefix: '₹', color: 'emerald', sub: `${donations.length} donors` },
+                    { icon: Calendar, label: t('upcomingEvents'), value: upcomingEvents, color: 'blue', sub: `${completedEvents} ${t('completed')}` },
+                    { icon: Clock, label: t('pendingDonations'), value: pendingDonations, color: 'amber', sub: 'Awaiting payment' },
+                    { icon: CheckCircle, label: `Total ${t('events')}`, value: events.length, color: 'violet', sub: 'All time' },
                   ].map((kpi, i) => (
                     <motion.div key={i} className={`cfx-stat-card ${kpi.color}`} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} whileHover={{ y: -6 }}>
                       <div className="cfx-stat-icon"><kpi.icon size={22} /></div>
@@ -305,13 +332,21 @@ export default function CoFounderDashboard() {
                   </motion.div>
                 </div>
                 <motion.div className="cfx-table-card" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-                  <div className="cfx-table-header"><h3>Recent Donations</h3><button onClick={() => setActiveTab('donations')} className="cfx-view-all">View All →</button></div>
-                  <table className="cfx-table">
-                    <thead><tr><th>Donor</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
-                    <tbody>{donations.slice(0, 5).map(d => (
-                      <tr key={d.id}><td><div className="cfx-table-user"><div className="cfx-mini-avatar">{d.donor_name?.charAt(0)}</div>{d.donor_name}</div></td><td><strong>₹{Number(d.amount).toLocaleString()}</strong></td><td><span className={`cfx-status ${d.payment_status || 'pending'}`}>{d.payment_status || 'pending'}</span></td><td>{new Date(d.created_at).toLocaleDateString('en-IN')}</td></tr>
-                    ))}</tbody>
-                  </table>
+                  <div className="cfx-table-header"><h3>{t('recentDonations')}</h3><button onClick={() => setActiveTab('donations')} className="cfx-view-all">{t('viewAll')} →</button></div>
+                  {donations.length === 0 ? (
+                    <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
+                      <Heart size={40} style={{ opacity: 0.3, marginBottom: '12px' }} />
+                      <p style={{ fontSize: '14px', fontWeight: '600', marginBottom: '4px' }}>No donations yet</p>
+                      <p style={{ fontSize: '12px' }}>Donations will appear here once received</p>
+                    </div>
+                  ) : (
+                    <table className="cfx-table">
+                      <thead><tr><th>{t('name')}</th><th>{t('amount')}</th><th>{t('status')}</th><th>{t('date')}</th></tr></thead>
+                      <tbody>{donations.slice(0, 5).map(d => (
+                        <tr key={d.id}><td><div className="cfx-table-user"><div className="cfx-mini-avatar">{d.donor_name?.charAt(0)}</div>{d.donor_name}</div></td><td><strong>₹{Number(d.amount).toLocaleString()}</strong></td><td><span className={`cfx-status ${d.payment_status || 'pending'}`}>{d.payment_status || 'pending'}</span></td><td>{new Date(d.created_at).toLocaleDateString('en-IN')}</td></tr>
+                      ))}</tbody>
+                    </table>
+                  )}
                 </motion.div>
               </motion.div>
             )}
@@ -332,12 +367,20 @@ export default function CoFounderDashboard() {
                   </div>
                   <div className="cfx-events-list-col">
                     <h3>All Events</h3>
-                    {events.map((e, i) => (
-                      <motion.div className="cfx-event-item" key={e.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }}>
-                        <div><div className="cfx-event-item-header"><h4>{e.title}</h4><span className={`cfx-status ${e.status || 'upcoming'}`}>{e.status || 'upcoming'}</span></div><p>{e.description}</p><p className="cfx-event-meta">📅 {e.event_date ? new Date(e.event_date).toLocaleDateString('en-IN') : '-'} | 📍 {e.location || 'TBD'}</p></div>
-                        <button onClick={() => handleDeleteEvent(e.id)} className="cfx-delete-btn">Delete</button>
-                      </motion.div>
-                    ))}
+                    {events.length === 0 ? (
+                      <div style={{ padding: '40px 20px', textAlign: 'center', color: '#94a3b8' }}>
+                        <Calendar size={50} style={{ opacity: 0.2, marginBottom: '12px' }} />
+                        <p style={{ fontSize: '14px', fontWeight: '600', marginBottom: '4px' }}>No events created yet</p>
+                        <p style={{ fontSize: '12px' }}>Add your first event using the form</p>
+                      </div>
+                    ) : (
+                      events.map((e, i) => (
+                        <motion.div className="cfx-event-item" key={e.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }}>
+                          <div><div className="cfx-event-item-header"><h4>{e.title}</h4><span className={`cfx-status ${e.status || 'upcoming'}`}>{e.status || 'upcoming'}</span></div><p>{e.description}</p><p className="cfx-event-meta">📅 {e.event_date ? new Date(e.event_date).toLocaleDateString('en-IN') : '-'} | 📍 {e.location || 'TBD'}</p></div>
+                          <button onClick={() => handleDeleteEvent(e.id)} className="cfx-delete-btn">Delete</button>
+                        </motion.div>
+                      ))
+                    )}
                   </div>
                 </div>
               </motion.div>
@@ -347,12 +390,20 @@ export default function CoFounderDashboard() {
               <motion.div key="donations" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                 <div className="cfx-table-card">
                   <h3>All Donations</h3>
-                  <table className="cfx-table">
-                    <thead><tr><th>Donor</th><th>Email</th><th>Phone</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
-                    <tbody>{donations.map(d => (
-                      <tr key={d.id}><td><div className="cfx-table-user"><div className="cfx-mini-avatar">{d.donor_name?.charAt(0)}</div>{d.donor_name}</div></td><td>{d.email}</td><td>{d.phone || '-'}</td><td><strong>₹{Number(d.amount).toLocaleString()}</strong></td><td><span className={`cfx-status ${d.payment_status || 'pending'}`}>{d.payment_status || 'pending'}</span></td><td>{new Date(d.created_at).toLocaleDateString('en-IN')}</td></tr>
-                    ))}</tbody>
-                  </table>
+                  {donations.length === 0 ? (
+                    <div style={{ padding: '60px 20px', textAlign: 'center', color: '#94a3b8' }}>
+                      <Heart size={60} style={{ opacity: 0.2, marginBottom: '16px' }} />
+                      <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px', color: '#64748b' }}>No Donations Yet</h3>
+                      <p style={{ fontSize: '14px' }}>Donation records will appear here once people start contributing</p>
+                    </div>
+                  ) : (
+                    <table className="cfx-table">
+                      <thead><tr><th>Donor</th><th>Email</th><th>Phone</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+                      <tbody>{donations.map(d => (
+                        <tr key={d.id}><td><div className="cfx-table-user"><div className="cfx-mini-avatar">{d.donor_name?.charAt(0)}</div>{d.donor_name}</div></td><td>{d.email}</td><td>{d.phone || '-'}</td><td><strong>₹{Number(d.amount).toLocaleString()}</strong></td><td><span className={`cfx-status ${d.payment_status || 'pending'}`}>{d.payment_status || 'pending'}</span></td><td>{new Date(d.created_at).toLocaleDateString('en-IN')}</td></tr>
+                      ))}</tbody>
+                    </table>
+                  )}
                 </div>
               </motion.div>
             )}

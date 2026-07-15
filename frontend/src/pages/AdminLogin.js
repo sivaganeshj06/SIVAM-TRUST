@@ -25,16 +25,19 @@ export default function AdminLogin() {
       const { token, user } = res.data
       localStorage.setItem('token', token)
       localStorage.setItem('trust_user', JSON.stringify(user))
-      if (user.role === 'founder') navigate('/founder-dashboard')
-      else if (user.role === 'co-founder-1') navigate('/cofounder1-dashboard')
-      else if (user.role === 'co-founder-2') navigate('/cofounder2-dashboard')
-      else if (user.role === 'accountant') navigate('/accountant-dashboard')
-      else if (user.role === 'media') navigate('/media-dashboard')
-      else navigate('/admin')
+      
+      // Fast redirect based on role with minimal delay (200ms)
+      setTimeout(() => {
+        if (user.role === 'founder') navigate('/founder-dashboard', { replace: true })
+        else if (user.role === 'co-founder-1' || user.role === 'co-founder-2') navigate('/cofounder-dashboard', { replace: true })
+        else if (user.role === 'accountant') navigate('/accountant-dashboard', { replace: true })
+        else if (user.role === 'media') navigate('/media-dashboard', { replace: true })
+        else navigate('/access-denied', { replace: true })
+      }, 200)
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed. Try again.')
+      setLoading(false)
+      setError(err.response?.data?.error || 'Invalid credentials. Please try again.')
     }
-    setLoading(false)
   }
 
   return (

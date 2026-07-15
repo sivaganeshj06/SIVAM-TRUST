@@ -27,7 +27,7 @@ function Admin() {
 
   useEffect(() => {
     if (!token || !trustUser) {
-      navigate('/admin/login');
+      navigate('/admin/login', { replace: true });
       return;
     }
     fetchAll();
@@ -38,7 +38,7 @@ function Admin() {
       const role = trustUser?.role;
       const promises = [axios.get(`${API}/api/events`, { headers })]
 
-      if (['founder', 'co-founder', 'accountant'].includes(role)) {
+      if (['founder', 'co-founder-1', 'co-founder-2', 'accountant'].includes(role)) {
         promises.push(axios.get(`${API}/api/donations`, { headers }))
       }
       if (['founder'].includes(role)) {
@@ -53,7 +53,13 @@ function Admin() {
       if (results[3]) setMembers(results[3]?.value?.data || [])
     } catch (err) {
       console.error('fetchAll error:', err);
-      if (err.response?.status === 401) navigate('/admin/login');
+      if (err.response?.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('trust_user');
+        navigate('/admin/login', { replace: true });
+      } else if (err.response?.status === 403) {
+        navigate('/access-denied', { replace: true });
+      }
     }
   };
 
@@ -69,7 +75,7 @@ function Admin() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('trust_user');
-    navigate('/admin/login');
+    setTimeout(() => navigate('/admin/login', { replace: true }), 200);
   };
 
   const handleEventSubmit = async (e) => {
@@ -133,9 +139,9 @@ function Admin() {
 
   const canSeeTab = (tab) => {
     const role = trustUser?.role;
-    if (tab === 'donations') return ['founder', 'co-founder', 'accountant'].includes(role);
-    if (tab === 'events') return ['founder', 'co-founder'].includes(role);
-    if (tab === 'photos') return ['founder', 'co-founder', 'media'].includes(role);
+    if (tab === 'donations') return ['founder', 'co-founder-1', 'co-founder-2', 'accountant'].includes(role);
+    if (tab === 'events') return ['founder', 'co-founder-1', 'co-founder-2'].includes(role);
+    if (tab === 'photos') return ['founder', 'co-founder-1', 'co-founder-2', 'media'].includes(role);
     if (tab === 'contacts') return role === 'founder';
     if (tab === 'members') return role === 'founder';
     return false;

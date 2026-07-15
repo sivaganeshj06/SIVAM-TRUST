@@ -16,6 +16,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import { setupAxiosInterceptors, setupIdleTimeout, setupAbsoluteTimeout } from './utils/securityManager';
 import LoadingScreen from './components/LoadingScreen';
+import { LanguageProvider } from './contexts/LanguageContext';
 import './App.css';
 
 function SecurityWrapper({ children }) {
@@ -44,7 +45,7 @@ function SecurityWrapper({ children }) {
       prevPathRef.current = location.pathname;
       const timer = setTimeout(() => {
         setPageLoading(false);
-      }, 600);
+      }, 200); // Reduced to 200ms for faster transitions
       return () => clearTimeout(timer);
     }
   }, [location]);
@@ -61,25 +62,17 @@ function AdminRedirect() {
   const trustUser = JSON.parse(localStorage.getItem('trust_user') || 'null');
   if (!trustUser) return <Navigate to="/admin/login" replace />;
   if (trustUser.role === 'founder') return <Navigate to="/founder-dashboard" replace />;
-  if (trustUser.role === 'co-founder-1') return <Navigate to="/cofounder1-dashboard" replace />;
-  if (trustUser.role === 'co-founder-2') return <Navigate to="/cofounder2-dashboard" replace />;
+  if (trustUser.role === 'co-founder-1' || trustUser.role === 'co-founder-2') return <Navigate to="/cofounder-dashboard" replace />;
   if (trustUser.role === 'accountant') return <Navigate to="/accountant-dashboard" replace />;
   if (trustUser.role === 'media') return <Navigate to="/media-dashboard" replace />;
   return <Navigate to="/access-denied" replace />;
 }
 
-function CoFounderRedirect() {
-  const trustUser = JSON.parse(localStorage.getItem('trust_user') || 'null');
-  if (!trustUser) return <Navigate to="/admin/login" replace />;
-  if (trustUser.role === 'co-founder-1') return <Navigate to="/cofounder1-dashboard" replace />;
-  if (trustUser.role === 'co-founder-2') return <Navigate to="/cofounder2-dashboard" replace />;
-  return <Navigate to="/access-denied" replace />;
-}
-
 function App() {
   return (
-    <Router>
-      <SecurityWrapper>
+    <LanguageProvider>
+      <Router>
+        <SecurityWrapper>
         <Routes>
           <Route path="/admin/login" element={<AdminLogin />} />
           
@@ -89,13 +82,8 @@ function App() {
               <FounderDashboard />
             </ProtectedRoute>
           } />
-          <Route path="/cofounder1-dashboard" element={
-            <ProtectedRoute allowedRoles={['co-founder-1']}>
-              <CoFounderDashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/cofounder2-dashboard" element={
-            <ProtectedRoute allowedRoles={['co-founder-2']}>
+          <Route path="/cofounder-dashboard" element={
+            <ProtectedRoute allowedRoles={['co-founder-1', 'co-founder-2']}>
               <CoFounderDashboard />
             </ProtectedRoute>
           } />
@@ -110,14 +98,14 @@ function App() {
             </ProtectedRoute>
           } />
 
+          {/* Legacy routes - redirect to unified dashboard */}
+          <Route path="/cofounder1-dashboard" element={<Navigate to="/cofounder-dashboard" replace />} />
+          <Route path="/cofounder2-dashboard" element={<Navigate to="/cofounder-dashboard" replace />} />
+
           {/* Access Denied & Redirects */}
           <Route path="/access-denied" element={<AccessDenied />} />
-          <Route path="/cofounder-dashboard" element={<CoFounderRedirect />} />
           <Route path="/admin" element={<AdminRedirect />} />
-          <Route path="/admin/founder" element={<AdminRedirect />} />
-          <Route path="/admin/cofounder" element={<AdminRedirect />} />
-          <Route path="/admin/accountant" element={<AdminRedirect />} />
-          <Route path="/admin/media" element={<AdminRedirect />} />
+          <Route path="/admin/*" element={<AdminRedirect />} />
 
           {/* Public Routes */}
           <Route path="/*" element={
@@ -136,6 +124,7 @@ function App() {
         </Routes>
       </SecurityWrapper>
     </Router>
+    </LanguageProvider>
   );
 }
 

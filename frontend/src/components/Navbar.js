@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import logo from '../assets/LOGO.png';
+import BackButton from './BackButton';
+import LanguageSelector from './LanguageSelector';
+import { useLanguage } from '../contexts/LanguageContext';
 import './Navbar.css';
 
 function Navbar() {
@@ -9,6 +12,7 @@ function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const location = useLocation();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,13 +27,14 @@ function Navbar() {
 
   useEffect(() => { setMenuOpen(false); }, [location]);
 
-  const navLinks = [
-    { to: '/', label: 'Home' },
-    { to: '/donate', label: 'Donate' },
-    { to: '/events', label: 'Events' },
-    { to: '/team', label: 'Our Team' },
-    { to: '/contact', label: 'Contact' },
-  ];
+  // Update nav links whenever language changes
+  const navLinks = React.useMemo(() => [
+    { to: '/', label: t('home') },
+    { to: '/donate', label: t('donate') },
+    { to: '/events', label: t('events') },
+    { to: '/team', label: t('team') },
+    { to: '/contact', label: t('contact') },
+  ], [t]);
 
   const isActive = (path) => location.pathname === path;
 
@@ -50,6 +55,13 @@ function Navbar() {
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       >
         <div className="nav-inner">
+          {/* Back Button - Show on non-home pages */}
+          {location.pathname !== '/' && (
+            <div className="nav-back-wrapper">
+              <BackButton />
+            </div>
+          )}
+          
           {/* Brand */}
           <Link to="/" className="nav-brand">
             <motion.div
@@ -82,14 +94,15 @@ function Navbar() {
             ))}
           </div>
 
-          {/* CTA + Hamburger */}
+          {/* CTA + Language + Hamburger */}
           <div className="nav-right">
+            <LanguageSelector />
             <Link to="/donate" className="nav-cta-btn">
               <motion.button
                 whileHover={{ scale: 1.05, boxShadow: '0 8px 24px rgba(37,99,235,0.4)' }}
                 whileTap={{ scale: 0.97 }}
               >
-                Donate Now
+                {t('donate')}
               </motion.button>
             </Link>
             <button
@@ -134,7 +147,7 @@ function Navbar() {
                 transition={{ delay: 0.35 }}
               >
                 <Link to="/donate" onClick={() => setMenuOpen(false)}>
-                  <button className="nav-mobile-cta">Donate Now →</button>
+                  <button className="nav-mobile-cta">{t('donate')} →</button>
                 </Link>
               </motion.div>
             </motion.div>

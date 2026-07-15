@@ -3,8 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import './Events.css';
 import { API } from '../utils/api';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function Events() {
+  const { t } = useLanguage();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [lightbox, setLightbox] = useState(null);
@@ -38,8 +40,8 @@ export default function Events() {
       <section className="ev-hero">
         <div className="ev-hero-bg"><div className="ev-orb-1" /><div className="ev-orb-2" /></div>
         <motion.div className="ev-hero-inner" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-          <span className="ev-label">Community Events</span>
-          <h1 className="ev-hero-h1">Our Events & <span className="ev-grad">Initiatives</span></h1>
+          <span className="ev-label">Community {t('events')}</span>
+          <h1 className="ev-hero-h1">Our {t('events')} & <span className="ev-grad">Initiatives</span></h1>
           <p className="ev-hero-sub">See what we have been doing for the community across Tamil Nadu</p>
         </motion.div>
       </section>
@@ -50,10 +52,10 @@ export default function Events() {
           {['all', 'upcoming', 'completed'].map(f => (
             <motion.button key={f} className={`ev-filter-btn ${filter === f ? 'active' : ''}`}
               onClick={() => setFilter(f)} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-              {f === 'all' ? '🌐 All' : f === 'upcoming' ? '📅 Upcoming' : '✅ Completed'}
+              {f === 'all' ? `🌐 ${t('viewAll')}` : f === 'upcoming' ? `📅 ${t('upcoming')}` : `✅ ${t('completed')}`}
             </motion.button>
           ))}
-          <span className="ev-count">{filtered.length} events</span>
+          <span className="ev-count">{filtered.length} {t('events')}</span>
         </div>
       </div>
 
@@ -67,8 +69,8 @@ export default function Events() {
           ) : filtered.length === 0 ? (
             <motion.div className="ev-empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
               <span>📭</span>
-              <h3>No events found</h3>
-              <p>Check back soon for upcoming events!</p>
+              <h3>No {t('events')} found</h3>
+              <p>Check back soon for {t('upcoming')} {t('events')}!</p>
             </motion.div>
           ) : (
             <div className="ev-list">
@@ -79,7 +81,7 @@ export default function Events() {
                   whileHover={{ y: -4, boxShadow: '0 20px 48px rgba(0,0,0,0.1)' }}>
                   <div className="ev-card-header">
                     <span className={`ev-status ${event.status || 'upcoming'}`}>
-                      {event.status === 'completed' ? '✅ Completed' : '📅 Upcoming'}
+                      {event.status === 'completed' ? `✅ ${t('completed')}` : `📅 ${t('upcoming')}`}
                     </span>
                     <div className="ev-card-meta">
                       <span>📅 {new Date(event.event_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</span>

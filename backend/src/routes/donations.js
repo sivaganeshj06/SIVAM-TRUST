@@ -104,7 +104,7 @@ router.post('/', donationValidation, async (req, res) => {
 })
 
 // Get all donations (Founder + Co-Founder + Accountant)
-router.get('/', protect, requireRole('founder', 'co-founder', 'accountant'), async (req, res) => {
+router.get('/', protect, requireRole('founder', 'co-founder-1', 'co-founder-2', 'accountant'), async (req, res) => {
   const { data, error } = await supabase
     .from('donations')
     .select('*')

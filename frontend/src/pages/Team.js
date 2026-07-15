@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import './Team.css';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const teamData = [
   { category: 'Founder', color: '#2563eb', bg: '#eff6ff', members: [
@@ -21,13 +22,15 @@ const teamData = [
 function getInitials(name) { return name.split(' ').map(n => n[0]).join('').toUpperCase(); }
 
 export default function Team() {
+  const { t } = useLanguage();
+  
   return (
     <div className="tm">
       <section className="tm-hero">
         <div className="tm-hero-bg"><div className="tm-orb-1" /><div className="tm-orb-2" /></div>
         <motion.div className="tm-hero-inner" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-          <span className="tm-label">Our People</span>
-          <h1 className="tm-hero-h1">Meet the <span className="tm-grad">Dedicated Team</span></h1>
+          <span className="tm-label">Our {t('team')}</span>
+          <h1 className="tm-hero-h1">Meet the <span className="tm-grad">Dedicated {t('team')}</span></h1>
           <p className="tm-hero-sub">The passionate people behind Sivam Trust Foundation</p>
         </motion.div>
       </section>

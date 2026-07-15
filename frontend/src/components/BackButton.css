@@ -1,0 +1,81 @@
+.back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.back-button:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+  transform: translateX(-2px);
+}
+
+.back-button:active {
+  transform: translateX(-1px);
+}
+
+.back-button.dark {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #f1f5f9;
+}
+
+.back-button.dark:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.back-button-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Floating back button for mobile */
+.back-button-floating {
+  position: fixed;
+  bottom: 24px;
+  left: 16px;
+  z-index: 50;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  padding: 12px 20px;
+}
+
+.back-button-floating:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Dashboard inline back button */
+.back-button-inline {
+  margin-bottom: 1rem;
+}
+
+/* Hide on desktop if needed */
+@media (min-width: 769px) {
+  .back-button-mobile-only {
+    display: none;
+  }
+}
+
+/* Show on mobile */
+@media (max-width: 768px) {
+  .back-button {
+    font-size: 13px;
+    padding: 8px 14px;
+  }
+  
+  .back-button-floating {
+    bottom: 80px;
+    left: 12px;
+  }
+}

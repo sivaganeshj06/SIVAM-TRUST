@@ -19,9 +19,9 @@ function Login() {
     try {
       const res = await axios.post(`${API}/api/auth/login`, form);
       localStorage.setItem('token', res.data.token);
-      navigate('/admin');
+      setTimeout(() => navigate('/admin', { replace: true }), 200);
     } catch (err) {
-      setError('Invalid email or password!');
+      setError(err.response?.data?.error || 'Invalid email or password!');
     }
   };
 

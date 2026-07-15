@@ -62,7 +62,7 @@ const memberCreateValidation = [
   body('role')
     .trim()
     .notEmpty().withMessage('Role is required')
-    .isIn(['founder', 'co-founder', 'accountant', 'media']).withMessage('Invalid role'),
+    .isIn(['founder', 'co-founder-1', 'co-founder-2', 'accountant', 'media']).withMessage('Invalid role'),
 ];
 
 const memberUpdateValidation = [
@@ -83,7 +83,7 @@ const memberUpdateValidation = [
   body('role')
     .optional()
     .trim()
-    .isIn(['founder', 'co-founder', 'accountant', 'media']).withMessage('Invalid role'),
+    .isIn(['founder', 'co-founder-1', 'co-founder-2', 'accountant', 'media']).withMessage('Invalid role'),
   body('status')
     .optional()
     .trim()

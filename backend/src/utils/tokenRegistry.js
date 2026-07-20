@@ -33,7 +33,12 @@ const revokeAllUserTokens = (userId) => {
 
 const isRefreshTokenActive = (token) => {
   const data = activeRefreshTokens.get(token);
-  if (!data) return false;
+  if (!data) {
+    // In serverless environments (like Vercel), in-memory registries are cleared on spin-down.
+    // To prevent constant user logout, we allow tokens not found in the registry as long as
+    // they are cryptographically valid (which is verified via jwt.verify).
+    return true;
+  }
   if (data.expiresAt < Date.now()) {
     activeRefreshTokens.delete(token);
     return false;

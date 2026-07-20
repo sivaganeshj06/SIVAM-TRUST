@@ -13,12 +13,17 @@ const getJwtExpiry = (token) => {
 let isRefreshing = false;
 let refreshSubscribers = [];
 
-const subscribeTokenRefresh = (cb) => {
-  refreshSubscribers.push(cb);
+const subscribeTokenRefresh = (onSuccess, onError) => {
+  refreshSubscribers.push({ onSuccess, onError });
 };
 
 const onRefreshed = (token) => {
-  refreshSubscribers.map((cb) => cb(token));
+  refreshSubscribers.forEach((sub) => sub.onSuccess(token));
+  refreshSubscribers = [];
+};
+
+const onRefreshFailed = (error) => {
+  refreshSubscribers.forEach((sub) => sub.onError(error));
   refreshSubscribers = [];
 };
 
@@ -52,6 +57,7 @@ export const setupAxiosInterceptors = (navigate) => {
               onRefreshed(newToken);
             } catch (err) {
               isRefreshing = false;
+              onRefreshFailed(err);
               localStorage.removeItem('token');
               localStorage.removeItem('trust_user');
               navigate('/admin/login');
@@ -60,11 +66,16 @@ export const setupAxiosInterceptors = (navigate) => {
           }
 
           // Queue requests while token is refreshing
-          const retryOriginalRequest = new Promise((resolve) => {
-            subscribeTokenRefresh((newToken) => {
-              config.headers['Authorization'] = `Bearer ${newToken}`;
-              resolve(config);
-            });
+          const retryOriginalRequest = new Promise((resolve, reject) => {
+            subscribeTokenRefresh(
+              (newToken) => {
+                config.headers['Authorization'] = `Bearer ${newToken}`;
+                resolve(config);
+              },
+              (err) => {
+                reject(err);
+              }
+            );
           });
           return retryOriginalRequest;
         }
